@@ -1,3 +1,3 @@
-module.exports ={
-    '*.{ts,tsx,js,json}': () => ['pnpm validate'],
+module.exports = {
+  '*.{ts,tsx,js,json}': () => ['pnpm validate'],
 }
