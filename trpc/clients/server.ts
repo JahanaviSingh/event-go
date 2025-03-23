@@ -11,7 +11,7 @@ import { createTRPCContext } from '../server'
 import { appRouter, AppRouter } from '../server/router'
 
 const createContext = cache(() => {
-  const heads = new Headers(headers())
+  const heads = new Headers(headers)
   heads.set('x-trpc-source', 'rsc')
 
   return createTRPCContext({

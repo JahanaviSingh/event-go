@@ -23,6 +23,8 @@ model User {
     Admin   Admin?
     Manager Manager?
 
+    Bookings Booking[]
+    Tickets  Ticket[]
 }
 model Admin {
     id String @id
@@ -37,7 +39,167 @@ model Manager {
     id        String   @id
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-
     User     User    @relation(fields: [id], references: [id])
+    Auditorium   Auditorium? @relation(fields: [AuditoriumId], references: [id])
+    AuditoriumId Int?
+}
+model Auditorium{
+  id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    name      String
+    Screens   Screen[]
+    Address   Address?
+    Managers  Manager[]
+}
+model Address {
+    id            Int          @id @default(autoincrement())
+    createdAt     DateTime     @default(now())
+    updatedAt     DateTime     @updatedAt
+    AuditoriumId  Int          @unique
+    Auditorium    Auditorium   @relation(fields: [AuditoriumId], references: [id])
+    address       String
+    lat           Float
+    lng           Float
+}
+model Screen {
+    id              Int             @id @default(autoincrement())
+    createdAt       DateTime        @default(now())
+    updatedAt       DateTime        @updatedAt
+    number          Int
+    AuditoriumId        Int
+    Auditorium    Auditorium           @relation(fields: [AuditoriumId], references: [id])
+    Seats           Seat[]
+    Showtimes       Showtime[]
+    projectionType  ProjectionType  @default(STANDARD)
+    soundSystemType SoundSystemType @default(STANDARD)
+
+    price Float @default(180)
+
+    @@unique([AuditoriumId, number])
+}
+model Seat {
+    row      Int
+    column   Int
+    screenId Int
+    Screen   Screen    @relation(fields: [screenId], references: [id])
+    Bookings Booking[]
+
+    @@id([screenId, row, column])
 }
 
+model Show {
+    id          Int        @id @default(autoincrement())
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+    title       String
+    director    String
+    genre       Genre
+    duration    Int // Duration in minutes
+    releaseDate DateTime
+    posterUrl   String?
+    Showtimes   Showtime[]
+}
+
+model Showtime {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    startTime DateTime
+    showId   Int
+    Show     Show     @relation(fields: [showId], references: [id])
+    screenId  Int
+    Screen    Screen    @relation(fields: [screenId], references: [id])
+    Bookings  Booking[]
+
+    status ShowtimeStatus?
+
+    @@unique([startTime, screenId])
+}
+
+model Booking {
+    id         Int      @id @default(autoincrement())
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    userId     String
+    User       User     @relation(fields: [userId], references: [id])
+    showtimeId Int
+    Showtime   Showtime @relation(fields: [showtimeId], references: [id])
+    row        Int
+    column     Int
+    screenId   Int
+    Seat       Seat     @relation(fields: [screenId, row, column], references: [screenId, row, column])
+    Ticket     Ticket   @relation(fields: [ticketId], references: [id])
+    ticketId   Int
+
+    @@unique([screenId, row, column, showtimeId], name: "uniqueSeatShowtime")
+    @@index([screenId, row, column], name: "seatIndex")
+}
+
+model Ticket {
+    id   Int    @id @default(autoincrement())
+    uid  String
+    User User   @relation(fields: [uid], references: [id])
+
+    qrCode String?
+
+    Bookings Booking[]
+}
+
+enum ProjectionType {
+    STANDARD
+    DLP //DIGITAL LIGHT PROCESSING
+    LCD
+    LCOS //LIQUID CRYSTAL ON SILICON
+    LASER_PROJECTOR
+    LED_PROJECTOR
+    SHORT_THROW_PROJECTOR
+    PANORAMIC_360_DEGREE_PROJECTION
+}
+
+enum SoundSystemType {
+    STANDARD
+    PA_SYSTEM
+    LINE_ARRAY_SYSTEM
+    POINT_SOURCE_SYSTEM
+    SURROUND_SOUND_SYSTEM
+    CEILING_OR_IN_WALL_SPEAKERS
+    SUBWOOFER_SYSTEM
+    WIRELESS_MICROPHONE_SYSTEM
+    DIGITAL_SIGNAL_PROCESSING_SYSTEM
+    BI_AMP_SYSTEM
+    TRI_AMP_SYSTEM
+}
+
+enum Genre {
+    LECTURE
+    CONFERENCE
+    STUDENT_PERFORMANCE_AND_PRODUCTION
+    CONVOCATION_CEREMONY
+    CULTURAL
+    ART_EXHIBITION
+    FILM_SCREENING
+    WORKSHOP  
+    TRAINING_SESSION
+    PANEL_DISCUSSION
+    DEBATE
+    OPEN_HOUSE_AND_ORIENTATION_EVENT
+    NETWORKING_AND_CAREER_FAIR
+    RELIGIOUS_AND_SPIRITUAL_GATHERING
+    CHARITY_AND_FUNDRAISING_EVENT
+    SPORTS_EVENT  
+    E_SPORTS_EVENT
+    ALUMNI_EVENT_AND_REUNION
+    HEALTH_AND_WELLNESS_SEMINAR
+    POLITICAL_RALLY_AND_CAMPAIGN_EVENT
+    TECHNOLOGY_AND_INNOVATION_EXPO
+    CULTURAL_FEST
+    TECHNICAL_FEST
+    FEST
+}
+
+enum ShowtimeStatus {
+    POSTPONED
+    CANCELLED
+}
