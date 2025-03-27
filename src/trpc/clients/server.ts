@@ -1,4 +1,4 @@
-import 'server-only'
+'server-only'
 
 import { createTRPCProxyClient, TRPCClientError } from '@trpc/client'
 import { callProcedure } from '@trpc/server'
@@ -10,8 +10,8 @@ import { cache } from 'react'
 import { createTRPCContext } from '../server'
 import { appRouter, AppRouter } from '../server/router'
 
-const createContext = cache(() => {
-  const heads = new Headers(headers)
+const createContext = cache(async () => {
+  const heads = new Headers(await headers())
   heads.set('x-trpc-source', 'rsc')
 
   return createTRPCContext({

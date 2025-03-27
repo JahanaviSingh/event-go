@@ -1,5 +1,5 @@
 import { prisma } from '@/db/prisma'
-import { Role } from './util/types'
+import { Role } from '../../util/types'
 import { TRPCError } from '@trpc/server'
 
 export const getUserRoles = async (id: string): Promise<Role[]> => {
@@ -32,4 +32,3 @@ export const authorizeUser = async (
     })
   }
 }
-
