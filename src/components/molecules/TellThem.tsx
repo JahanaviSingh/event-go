@@ -1,14 +1,14 @@
 import { Role } from '@/util/types'
 import { AlertBox } from './AlertBox'
-import { CopyToClipboard } from './CopyToClipboard' 
-import{ auth } from '@clerk/nextjs/server'
+import { CopyToClipboard } from './CopyToClipboard'
+import { auth } from '@clerk/nextjs/server'
 
 export interface ITellThemProps {
   uid: string
   role: Role
 }
 
-export const TellThem = ({uid,role }: ITellThemProps) => {
+export const TellThem = ({ uid, role }: ITellThemProps) => {
   return (
     <AlertBox>
       <div className="max-w-sm ">

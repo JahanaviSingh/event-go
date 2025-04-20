@@ -6,8 +6,8 @@ export const adminsRouter = createTRPCRouter({
   }),
   adminMe: protectedProcedure().query(({ ctx }) => {
     if (!ctx.userId) {
-        return null; // Return null if userId is null or undefined
-      }
-    return ctx.db.admin.findUnique({ where: { id:ctx.userId } })
+      return null // Return null if userId is null or undefined
+    }
+    return ctx.db.admin.findUnique({ where: { id: ctx.userId } })
   }),
 })

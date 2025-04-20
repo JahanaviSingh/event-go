@@ -93,7 +93,7 @@ model Show {
     createdAt   DateTime   @default(now())
     updatedAt   DateTime   @updatedAt
     title       String
-    director    String
+    organizer   String
     genre       Genre
     duration    Int // Duration in minutes
     releaseDate DateTime

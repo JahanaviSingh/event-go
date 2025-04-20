@@ -7,7 +7,7 @@ import { httpBatchLink } from '@trpc/client'
 import { AppRouter } from '../server/router'
 import { getUrl } from './shared'
 
-export const trpcClient = createTRPCReact<AppRouter>();
+export const trpcClient = createTRPCReact<AppRouter>()
 
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient())

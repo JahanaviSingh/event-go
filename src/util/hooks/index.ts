@@ -1,4 +1,3 @@
-
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useReducer, useRef, useState } from 'react'
 
@@ -16,4 +15,3 @@ export const useDialogState = (defaultState = false) => {
 
   return [open, setOpen] as const
 }
-

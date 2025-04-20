@@ -65,7 +65,7 @@ CREATE TABLE "Show" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "title" TEXT NOT NULL,
-    "director" TEXT NOT NULL,
+    "organizer" TEXT NOT NULL,
     "genre" "Genre" NOT NULL,
     "duration" INTEGER NOT NULL,
     "releaseDate" TIMESTAMP(3) NOT NULL,

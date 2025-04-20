@@ -26,6 +26,6 @@ export const protectedProcedure = (...roles: Role[]) =>
     }
     await authorizeUser(session.userId, roles) // Use the awaited session
     return next({
-      ctx:{...ctx, userId:(await ctx.session).userId}
+      ctx: { ...ctx, userId: (await ctx.session).userId },
     })
   })

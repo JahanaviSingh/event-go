@@ -10,7 +10,7 @@ export const AdminMenu = () => {
         Create auditorium
       </Link>
       <Link href="/admin/shows">Show</Link>
-      <Link className="pl-4" href="/admin/Show/new">
+      <Link className="pl-4" href="/admin/shows/new">
         Create show
       </Link>
       <Link href="/admin/admins">Manage admins</Link>
