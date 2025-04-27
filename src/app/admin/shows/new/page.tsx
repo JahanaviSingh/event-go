@@ -1,4 +1,4 @@
-import { CreateShow } from "@/components/templates/CreateShow";
+import { CreateShow } from '@/components/templates/CreateShow'
 
 export default function Page() {
   return (

@@ -33,7 +33,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         type={type}
-        {...props} 
+        {...props}
       >
         {loading ? <Loader className="animate-spin" /> : children}
       </Comp>

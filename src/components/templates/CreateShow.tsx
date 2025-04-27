@@ -36,6 +36,8 @@ export const CreateShow = () => {
         console.log('errors', errors)
         console.log('Form submitted:', data)
         const show = await mutateAsync(data)
+        console.log('show', show)
+
         if (show) {
           reset()
           toast({ title: `Show ${data.title} created successfully` })
@@ -52,7 +54,7 @@ export const CreateShow = () => {
         <Input placeholder="Enter Organizer" {...register('organizer')} />
       </Label>
 
-        {/* <Label title="Screen" error={errors.screenId?.message}>
+      {/* <Label title="Screen" error={errors.screenId?.message}>
           <HtmlSelect {...register('screenId', { valueAsNumber: true })}>
             <option value="">Select Screen</option>
             {screens?.map((screen) => (
@@ -94,7 +96,7 @@ export const CreateShow = () => {
           {...register('releaseDate', {
             setValueAs: (value) => {
               const date = new Date(value)
-              return isNaN(date.getTime()) ? '' : date.toISOString()
+              return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0]
             },
           })}
         />
@@ -111,7 +113,7 @@ export const CreateShow = () => {
       </Label>
 
       <Button loading={isLoading} type="submit">
-        Submit
+        Create Show
       </Button>
     </form>
   )

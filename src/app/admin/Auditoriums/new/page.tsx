@@ -1,7 +1,8 @@
-
 const page = () => {
   return (
-    <div><CreateAuditorium/></div>
+    <div>
+      <CreateAuditorium />
+    </div>
   )
 }
 

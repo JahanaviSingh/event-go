@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -17,18 +13,14 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "typeRoots": [
-      "./node_modules/@types"
-    ],
+    "typeRoots": ["./node_modules/@types"],
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     }
   },
   "include": [
@@ -38,8 +30,6 @@
     ".next/types/**/*.ts",
     "node_modules/@prisma/client",
     "node_modules/@hookform/resolvers"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+, "prisma/seed.js"  ],
+  "exclude": ["node_modules"]
 }
