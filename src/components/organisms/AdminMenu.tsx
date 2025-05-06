@@ -5,8 +5,8 @@ export const AdminMenu = () => {
       <Link href="/admin" className="text-orange-500">
         Dashboard
       </Link>
-      <Link href="/admin/Auditorium">Auditorium</Link>
-      <Link className="pl-4" href="/admin/Auditorium/new">
+      <Link href="/admin/auditoriums">Auditorium</Link>
+      <Link className="pl-4" href="/admin/auditoriums/new">
         Create auditorium
       </Link>
       <Link href="/admin/shows">Show</Link>

@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono, Inter } from 'next/font/google'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
 import { TRPCReactProvider } from '../trpc/clients/client'
 import { Container } from '@/components/atoms/container'
 import { Navbar } from '@/components/organisms/Navbar'
 import { Toaster } from '@/components/molecules/Toaster/toaster'
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],

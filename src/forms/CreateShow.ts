@@ -7,4 +7,6 @@ import { schemaCreateShows } from '@/schema/showSchema'
 
 export type FormTypeCreateShows = z.infer<typeof schemaCreateShows>
 export const useFormCreateShow = () =>
-  useForm<FormTypeCreateShows>({ resolver: zodResolver(schemaCreateShows) })
+  useForm<FormTypeCreateShows>({ 
+    resolver: zodResolver(schemaCreateShows) 
+  })

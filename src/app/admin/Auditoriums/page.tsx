@@ -1,9 +1,9 @@
-import { ListAuditoriums } from '@/components/templates/ListShows'
+import { ListAuditoriums } from '@/components/templates/ListAuditoriums'
 
 export default function Page() {
   return (
     <main>
-      <ListAuditoriums />
+      <ListAuditoriums auditoriums={[]} />
     </main>
   )
 }

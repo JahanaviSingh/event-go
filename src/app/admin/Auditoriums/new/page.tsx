@@ -1,9 +1,11 @@
+import { CreateAuditorium } from "@/components/templates/CreateAuditorium"
+import { FormProviderCreateAuditorium } from "@/forms/CreateAuditorium"
+
 const page = () => {
   return (
-    <div>
+    <FormProviderCreateAuditorium>
       <CreateAuditorium />
-    </div>
+    </FormProviderCreateAuditorium>
   )
 }
-
 export default page
