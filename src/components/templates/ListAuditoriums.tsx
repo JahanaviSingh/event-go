@@ -23,13 +23,12 @@ export const ListAuditoriums = ({ auditoriums }: IListShowsProps) => {
 
       <div className="flex flex-col gap-3">
         {auditoriums.map((auditorium) => (
-          <AuditoriumInfo auditorium={auditorium} key= {auditorium.id}  />
+          <AuditoriumInfo auditorium={auditorium} key={auditorium.id} />
         ))}
       </div>
     </div>
   )
 }
-
 
 export const ShowScreenShowtimes = ({ screenId }: { screenId: number }) => {
   const { data, isLoading } = trpcClient.showtimes.showtimesPerScreen.useQuery({

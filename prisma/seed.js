@@ -72,8 +72,6 @@ async function main() {
     },
   })
 
-  
-
   console.log('Dummy data inserted successfully!')
 }
 

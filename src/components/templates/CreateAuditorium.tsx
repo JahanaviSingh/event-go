@@ -13,11 +13,42 @@ import { Map } from '../organisms/Map/Map'
 import { CenterOfMap, DefaultZoomControls } from '../organisms/Map/ZoomControls'
 import { Panel } from '../organisms/Map/Panel'
 import { Marker } from '../organisms/Map/MapMarker'
-import { RectangleHorizontal } from 'lucide-react'
+import { RectangleHorizontal, Plus as IconPlus } from 'lucide-react'
 import { SimpleAccordion } from '../atoms/accordion'
 import { useMap } from 'react-map-gl/maplibre'
 import { SearchPlace } from '../organisms/Map/SearchPlace'
-import { ViewState } from '../organisms/Map/Map'
+import type { ViewState } from '@vis.gl/react-maplibre'
+import { useState } from 'react'
+import { Prisma } from '@prisma/client'
+import { AuditoriumMarker } from '../organisms/Map/AuditoriumMarker'
+
+const PROJECTION_TYPES = [
+  'STANDARD',
+  'DLP',
+  'LCD',
+  'LCOS',
+  'LASER_PROJECTOR',
+  'LED_PROJECTOR',
+  'SHORT_THROW_PROJECTOR',
+  'PANORAMIC_360_DEGREE_PROJECTION'
+] as const
+
+const SOUND_SYSTEM_TYPES = [
+  'STANDARD',
+  'PA_SYSTEM',
+  'LINE_ARRAY_SYSTEM',
+  'POINT_SOURCE_SYSTEM',
+  'SURROUND_SOUND_SYSTEM',
+  'CEILING_OR_IN_WALL_SPEAKERS',
+  'SUBWOOFER_SYSTEM',
+  'WIRELESS_MICROPHONE_SYSTEM',
+  'DIGITAL_SIGNAL_PROCESSING_SYSTEM',
+  'BI_AMP_SYSTEM',
+  'TRI_AMP_SYSTEM'
+] as const
+
+type ProjectionType = typeof PROJECTION_TYPES[number]
+type SoundSystemType = typeof SOUND_SYSTEM_TYPES[number]
 
 export const CreateAuditorium = () => {
   const {
@@ -31,14 +62,46 @@ export const CreateAuditorium = () => {
     trpcClient.auditoriums.createAuditorium.useMutation()
   const { toast } = useToast()
   const router = useRouter()
+  const [viewState, setViewState] = useState<ViewState>({
+    longitude: 80.2,
+    latitude: 12.9,
+    zoom: 8,
+    bearing: 0,
+    pitch: 22.5,
+    padding: { top: 0, bottom: 0, left: 0, right: 0 },
+  })
+  const [nearbyAuditoriums, setNearbyAuditoriums] = useState<any[]>([])
 
   const handleLocationChange = (location: ViewState) => {
     setValue('address.lat', location.latitude, { shouldValidate: true })
     setValue('address.lng', location.longitude, { shouldValidate: true })
+    setViewState({
+      ...location,
+      zoom: 15,
+      padding: { top: 0, bottom: 0, left: 0, right: 0 },
+    })
   }
 
+  const searchAuditoriums = trpcClient.auditoriums.searchAuditoriums.useQuery(
+    {
+      where: {},
+      addressWhere: {
+        ne_lat: viewState.latitude + 0.1,
+        ne_lng: viewState.longitude + 0.1,
+        sw_lat: viewState.latitude - 0.1,
+        sw_lng: viewState.longitude - 0.1,
+      }
+    },
+    {
+      enabled: true,
+      onSuccess: (data) => {
+        setNearbyAuditoriums(data)
+      }
+    }
+  )
+
   return (
-    <div className='grid grid-cols-2 gap-4'>
+    <div className="grid grid-cols-2 gap-4">
       <form
         onSubmit={handleSubmit(async (data) => {
           console.log('data', data)
@@ -71,19 +134,22 @@ export const CreateAuditorium = () => {
         </Button>
       </form>
       <Map
-        initialViewState={{
-          longitude: 80.2,
-          latitude: 12.9,
-          zoom: 8,
-          bearing: 0,
-          pitch: 22.5
-        }}
+        initialViewState={viewState}
+        onMove={(evt) => setViewState(evt.viewState)}
       >
         <MapMarker />
+        {nearbyAuditoriums?.map((auditorium) => (
+          <AuditoriumMarker
+            key={auditorium.id}
+            longitude={auditorium.Address.lng}
+            latitude={auditorium.Address.lat}
+            name={auditorium.name}
+          />
+        ))}
 
         <Panel position="left-top">
           <SearchPlace onLocationChange={handleLocationChange} />
-          
+
           <DefaultZoomControls>
             <CenterOfMap
               onClick={(latLng) => {
@@ -92,6 +158,12 @@ export const CreateAuditorium = () => {
 
                 setValue('address.lat', lat, { shouldValidate: true })
                 setValue('address.lng', lng, { shouldValidate: true })
+                setViewState({
+                  ...viewState,
+                  latitude: lat,
+                  longitude: lng,
+                  zoom: 15,
+                })
               }}
             />
           </DefaultZoomControls>
@@ -100,11 +172,11 @@ export const CreateAuditorium = () => {
     </div>
   )
 }
+
 const AddScreens = () => {
   const {
     control,
     register,
-    reset,
     formState: { errors },
     watch,
   } = useFormContext<FormTypeCreateAuditorium>()
@@ -113,29 +185,100 @@ const AddScreens = () => {
     control,
     name: 'screens',
   })
+  const [hovered, setHovered] = useState<string | null>(null)
+
   return (
     <div>
-      {fields.map((item, screenIndex) => {
-        return (
-          <SimpleAccordion title={screenIndex + 1} key={item.id}>
-            <div className={`flex justify-end my-2`}>
+      {fields.map((item, screenIndex) => (
+        <SimpleAccordion 
+          key={item.id} 
+          title={`Screen ${screenIndex + 1}`}
+        >
+          <div className={`flex flex-col gap-2 ${hovered === item.id ? 'bg-strip' : ''}`}>
+            <div className="grid grid-cols-2 gap-2">
+              <Label
+                title="Projection type"
+                error={errors.screens?.[screenIndex]?.projectionType?.message}
+              >
+                <select
+                  className="w-full p-2 border rounded"
+                  {...register(`screens.${screenIndex}.projectionType`)}
+                >
+                  {PROJECTION_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type.replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </select>
+              </Label>
+              <Label
+                title="Sound system type"
+                error={errors.screens?.[screenIndex]?.soundSystemType?.message}
+              >
+                <select
+                  className="w-full p-2 border rounded"
+                  {...register(`screens.${screenIndex}.soundSystemType`)}
+                >
+                  {SOUND_SYSTEM_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type.replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </select>
+              </Label>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Label
+                title="Rows"
+                error={errors.screens?.[screenIndex]?.rows?.message}
+              >
+                <Input
+                  type="number"
+                  placeholder="Enter rows"
+                  {...register(`screens.${screenIndex}.rows`, {
+                    valueAsNumber: true,
+                  })}
+                />
+              </Label>
+              <Label
+                title="Columns"
+                error={errors.screens?.[screenIndex]?.columns?.message}
+              >
+                <Input
+                  type="number"
+                  placeholder="Enter columns"
+                  {...register(`screens.${screenIndex}.columns`, {
+                    valueAsNumber: true,
+                  })}
+                />
+              </Label>
+              <Label
+                title="Price"
+                error={errors.screens?.[screenIndex]?.price?.message}
+              >
+                <Input
+                  type="number"
+                  placeholder="Enter price"
+                  {...register(`screens.${screenIndex}.price`, {
+                    valueAsNumber: true,
+                  })}
+                />
+              </Label>
+            </div>
+            <div className="flex justify-end my-2">
               <Button
                 variant="link"
                 size="sm"
                 className="text-xs text-gray-600 underline underline-offset-2"
-                onClick={() => {
-                  remove(screenIndex)
-                }}
+                onClick={() => remove(screenIndex)}
               >
-                remove screen
+                Remove screen
               </Button>
             </div>
-            <div>{item.id}</div>
-          </SimpleAccordion>
-        )
-      })}
-      
-      <div className={`flex justify-end my-2`}>
+          </div>
+        </SimpleAccordion>
+      ))}
+      <div className="flex justify-end my-2">
         <Button
           variant="link"
           size="sm"
@@ -144,30 +287,16 @@ const AddScreens = () => {
             append({
               columns: 0,
               price: 0,
-              projectionType: 'LASER_PROJECTOR',
+              projectionType: 'STANDARD' as ProjectionType,
               rows: 0,
-              soundSystemType: 'BI_AMP_SYSTEM',
+              soundSystemType: 'STANDARD' as SoundSystemType,
             })
           }}
         >
-          add screen
+          Add screen
         </Button>
       </div>
     </div>
-  )
-}
-export const SearchBox = ({
-  onChange,
-}: {
-  onChange: ({ lat, lng }: { lat: number; lng: number }) => void
-}) => {
-  const { current: map } = useMap()
-  return (
-    <SearchPlace
-      onLocationChange={(location: ViewState) => {
-        onChange({ lat: location.latitude, lng: location.longitude })
-      }}
-    />
   )
 }
 
@@ -177,14 +306,13 @@ const MapMarker = () => {
 
   return (
     <Marker
-      pitchAlignment="auto"
       longitude={address?.lng || 0}
       latitude={address?.lat || 0}
       draggable
-      onDragEnd={({ lngLat }) => {
-        const { lat, lng } = lngLat
-        setValue('address.lat', lat || 0)
-        setValue('address.lng', lng || 0)
+      onDragEnd={(e) => {
+        const lngLat = e.lngLat
+        setValue('address.lat', lngLat.lat || 0)
+        setValue('address.lng', lngLat.lng || 0)
       }}
     >
       <BrandIcon />
@@ -193,7 +321,7 @@ const MapMarker = () => {
 }
 
 export const BrandIcon = () => (
-  <div style={{ perspective: '20 px' }}>
+  <div style={{ perspective: '20px' }}>
     <RectangleHorizontal style={{ transform: 'rotateX(22deg)' }} />
   </div>
 )

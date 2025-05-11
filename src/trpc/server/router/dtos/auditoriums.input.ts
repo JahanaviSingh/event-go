@@ -17,7 +17,7 @@ const addressWhere = z.object({
 })
 
 export const auditoriumWhereInputSchema = z.union([
-    auditoriumWhereInputSchemaPrimitive,
+  auditoriumWhereInputSchemaPrimitive,
 
   z.object({
     AND: z.array(auditoriumWhereInputSchemaPrimitive).optional(),

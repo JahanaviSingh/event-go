@@ -29,7 +29,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "node_modules/@prisma/client",
-    "node_modules/@hookform/resolvers"
-, "prisma/seed.js"  ],
+    "node_modules/@hookform/resolvers",
+    "prisma/seed.js"
+  ],
   "exclude": ["node_modules"]
 }

@@ -9,8 +9,8 @@ export const showsRouter = createTRPCRouter({
   createShow: protectedProcedure('admin')
     .input(schemaCreateShows)
     .mutation(async ({ ctx, input }) => {
-      console.log(input);
-      
+      console.log(input)
+
       const { showtimes, releaseDate, ...rest } = input
       const screenId = 1
       return ctx.db.show.create({

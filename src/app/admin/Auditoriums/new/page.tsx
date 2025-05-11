@@ -1,5 +1,5 @@
-import { CreateAuditorium } from "@/components/templates/CreateAuditorium"
-import { FormProviderCreateAuditorium } from "@/forms/CreateAuditorium"
+import { CreateAuditorium } from '@/components/templates/CreateAuditorium'
+import { FormProviderCreateAuditorium } from '@/forms/CreateAuditorium'
 
 const page = () => {
   return (

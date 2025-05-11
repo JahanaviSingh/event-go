@@ -5,6 +5,8 @@ import { auth } from '@clerk/nextjs/server'
 import { Divide } from 'lucide-react'
 import { SimpleSidebar } from '@/components/molecules/SimpleSidebar'
 import { AdminMenu } from '@/components/organisms/AdminMenu'
+import { headers } from 'next/headers'
+
 export default async function Layout({
   children,
 }: {
@@ -19,6 +21,7 @@ export default async function Layout({
   if (!adminMe?.id) {
     return <TellThem uid={userId} role={'admin'} />
   }
+
   return (
     <div className="flex mt-2">
       <div className="hidden w-full max-w-xs min-w-min sm:block">

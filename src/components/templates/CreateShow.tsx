@@ -96,7 +96,9 @@ export const CreateShow = () => {
           {...register('releaseDate', {
             setValueAs: (value) => {
               const date = new Date(value)
-              return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0]
+              return isNaN(date.getTime())
+                ? ''
+                : date.toISOString().split('T')[0]
             },
           })}
         />

@@ -6,7 +6,8 @@ import {
   IconPlus,
   IconSoup,
 } from '@tabler/icons-react'
-import { LngLat, useMap } from 'react-map-gl/maplibre'
+import { useMap } from 'react-map-gl/maplibre'
+import type { LngLat } from 'mapbox-gl'
 
 export interface IZoomControlsProps {}
 
@@ -54,8 +55,10 @@ export const CenterOfMap = ({
       className=" hover:bg-white"
       type="button"
       onClick={() => {
-        const { lat, lng } = map?.getCenter() as { lng: number; lat: number }
-        onClick({ lat, lng })
+        const center = map?.getCenter()
+        if (center) {
+          onClick({ lat: center.lat, lng: center.lng })
+        }
       }}
     >
       <IconFocusCentered className="w-8 h-8 p-1.5 text-black" />

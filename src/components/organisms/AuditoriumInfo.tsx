@@ -1,12 +1,11 @@
-import { RouterOutputs } from "@/trpc/clients/types"
-import { AlertBox } from "../molecules/AlertBox"
-import { ShowScreenShowtimes } from "../templates/ListAuditoriums"
-
+import { RouterOutputs } from '@/trpc/clients/types'
+import { AlertBox } from '../molecules/AlertBox'
+import { ShowScreenShowtimes } from '../templates/ListAuditoriums'
 
 export const AuditoriumInfo = ({
-    auditorium,
+  auditorium,
 }: {
-    auditorium: RouterOutputs['auditoriums']['auditoriums'][0]
+  auditorium: RouterOutputs['auditoriums']['auditoriums'][0]
 }) => {
   return (
     <div>
@@ -20,7 +19,7 @@ export const AuditoriumInfo = ({
             <div className="font-light text-xl ">Screen {screen.number}</div>
 
             {screen.Showtimes.length === 0 ? (
-              <AlertBox className="bg-gray-200"> 
+              <AlertBox className="bg-gray-200">
                 <div className="text-gray-600 text-small">No shows found.</div>
               </AlertBox>
             ) : null}
