@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { revalidatePath } from '@/util/actions/revalidatePath'
 import { DataTable } from '@/components/molecules/DataTable'
 import { ColumnDef } from '@tanstack/react-table'
-import { User } from '@prisma/client'
+import { Manager, User } from '@prisma/client'
 import { useState } from 'react'
 import { Input } from '@/components/atoms/input'
 import { Label } from '@/components/atoms/label'
@@ -23,14 +23,26 @@ const createManagerSchema = z.object({
 
 type CreateManagerForm = z.infer<typeof createManagerSchema>
 
-const columns: ColumnDef<User>[] = [
+type ManagerWithUser = Omit<Manager, 'createdAt' | 'updatedAt'> & {
+  createdAt: string
+  updatedAt: string
+  User: Omit<User, 'createdAt' | 'updatedAt'> & {
+    createdAt: string
+    updatedAt: string
+    email?: string
+  }
+}
+
+const columns: ColumnDef<ManagerWithUser>[] = [
   {
-    accessorKey: 'name',
+    accessorKey: 'User.name',
     header: 'Name',
+    cell: ({ row }) => row.original.User?.name || '-',
   },
   {
-    accessorKey: 'email',
+    accessorKey: 'User.email',
     header: 'Email',
+    cell: ({ row }) => row.original.User?.email || '-',
   },
   {
     accessorKey: 'createdAt',

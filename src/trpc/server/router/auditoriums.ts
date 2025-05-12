@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '..'
-import { findManyAuditoriumArgsSchema } from './dtos/auditoriums.input'
-import { schemaCreateAuditorium } from '@/forms/CreateAuditorium'
+import { findManyAuditoriumArgsSchema, createAuditoriumSchema } from './dtos/auditoriums.input'
 import { locationFilter } from './dtos/common'
 
 export const auditoriumsRouter = createTRPCRouter({
@@ -59,7 +58,7 @@ export const auditoriumsRouter = createTRPCRouter({
     }),
 
   createAuditorium: protectedProcedure('admin')
-    .input(schemaCreateAuditorium)
+    .input(createAuditoriumSchema)
     .mutation(({ ctx, input }) => {
       const { address, auditoriumName, screens, managerId } = input
 

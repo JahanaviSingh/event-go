@@ -17,7 +17,6 @@ export const schemaCreateAuditorium = z.object({
     .nonempty({ message: 'Manager ID must have atleast one character!' }),
   address: schemaCreateAddress,
   screens: z.array(schemaCreateScreen),
-  strings: z.array(z.string()),
 })
 export type FormTypeCreateAuditorium = z.infer<typeof schemaCreateAuditorium>
 

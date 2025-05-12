@@ -21,6 +21,7 @@ import type { ViewState } from '@vis.gl/react-maplibre'
 import { useState } from 'react'
 import { Prisma } from '@prisma/client'
 import { AuditoriumMarker } from '../organisms/Map/AuditoriumMarker'
+import { AuditoriumLayout } from '../organisms/AuditoriumLayout'
 
 const PROJECTION_TYPES = [
   'STANDARD',
@@ -104,15 +105,25 @@ export const CreateAuditorium = () => {
     <div className="grid grid-cols-2 gap-4">
       <form
         onSubmit={handleSubmit(async (data) => {
-          console.log('data', data)
-          const auditorium = await createAuditorium(data)
-          if (auditorium) {
+          try {
+            console.log('Submitting auditorium data:', data)
+            const auditorium = await createAuditorium(data)
+            console.log('Auditorium created:', auditorium)
+            
             reset()
             toast({
               title: `Auditorium ${data.auditoriumName} created successfully`,
+              variant: 'default',
             })
             revalidatePath('/admin/auditoriums')
             router.replace('/admin/auditoriums')
+          } catch (error) {
+            console.error('Error creating auditorium:', error)
+            toast({
+              title: 'Failed to create auditorium',
+              description: error instanceof Error ? error.message : 'An unknown error occurred',
+              variant: 'destructive',
+            })
           }
         })}
       >
@@ -252,19 +263,18 @@ const AddScreens = () => {
                   })}
                 />
               </Label>
-              <Label
-                title="Price"
-                error={errors.screens?.[screenIndex]?.price?.message}
-              >
-                <Input
-                  type="number"
-                  placeholder="Enter price"
-                  {...register(`screens.${screenIndex}.price`, {
-                    valueAsNumber: true,
-                  })}
+            </div>
+            
+            <div className="mt-4">
+              <Label title="Seating Layout Preview">
+                <AuditoriumLayout 
+                  rows={watch(`screens.${screenIndex}.rows`) || 0}
+                  columns={watch(`screens.${screenIndex}.columns`) || 0}
+                  className="mt-2"
                 />
               </Label>
             </div>
+
             <div className="flex justify-end my-2">
               <Button
                 variant="link"
@@ -286,7 +296,6 @@ const AddScreens = () => {
           onClick={() => {
             append({
               columns: 0,
-              price: 0,
               projectionType: 'STANDARD' as ProjectionType,
               rows: 0,
               soundSystemType: 'STANDARD' as SoundSystemType,

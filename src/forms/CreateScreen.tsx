@@ -10,7 +10,6 @@ export const schemaCreateScreen = z.object({
   soundSystemType: z.nativeEnum(SoundSystemType),
   rows: z.number(),
   columns: z.number(),
-  price: z.number(),
 })
 
 export type FormTypeCreateScreen = z.infer<typeof schemaCreateScreen>

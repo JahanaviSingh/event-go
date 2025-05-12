@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { SortOrder, intFilter, stringFilter } from './common'
+import { ProjectionType, SoundSystemType } from '@prisma/client'
 
 const auditoriumOrderByWithRelationInputSchema = z.object({
   id: SortOrder,
@@ -41,3 +42,19 @@ export const findManyAuditoriumArgsSchema = z.object({
 })
 
 export const auditoriumScalarFieldEnumSchema = z.enum(['id'])
+
+export const createAuditoriumSchema = z.object({
+  auditoriumName: z.string().min(1, { message: 'Auditorium name is required' }),
+  managerId: z.string().nonempty({ message: 'Manager ID must have atleast one character!' }),
+  address: z.object({
+    lat: z.number(),
+    lng: z.number(),
+    address: z.string(),
+  }),
+  screens: z.array(z.object({
+    projectionType: z.nativeEnum(ProjectionType),
+    soundSystemType: z.nativeEnum(SoundSystemType),
+    rows: z.number(),
+    columns: z.number(),
+  })),
+})

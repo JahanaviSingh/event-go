@@ -14,7 +14,7 @@ export const AdminMenu = () => {
         Create show
       </Link>
       <Link href="/admin/admins">Manage admins</Link>
-      <Link href="/admin/manager">Manage manager</Link>
+      <Link href="/admin/managers">Manage manager</Link>
     </div>
   )
 }
