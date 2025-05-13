@@ -7,6 +7,7 @@ import { TRPCReactProvider } from '../trpc/clients/client'
 import { Container } from '@/components/atoms/container'
 import { Navbar } from '@/components/organisms/Navbar'
 import { Toaster } from '@/components/molecules/Toaster/toaster'
+import { Providers } from './providers'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -35,7 +36,9 @@ export default function RootLayout({
           <body className={inter.className}>
             <Toaster />
             <Navbar />
-            <Container>{children}</Container>
+            <Providers>
+              <Container>{children}</Container>
+            </Providers>
           </body>
         </html>
       </TRPCReactProvider>

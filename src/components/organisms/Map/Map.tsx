@@ -2,7 +2,6 @@
 import React from 'react'
 import { Map as MapGl } from 'react-map-gl/maplibre'
 import type { ViewState } from '@vis.gl/react-maplibre'
-import { DefaultZoomControls } from './ZoomControls'
 import { Panel } from './Panel'
 
 type MapProps = React.ComponentProps<typeof MapGl> & { height?: string }
@@ -20,9 +19,6 @@ export const Map = ({ height = 'calc(100vh - 4rem)', ...props }: MapProps) => {
       dragRotate={false}
     >
       {props.children}
-      <Panel position="right-top">
-        <DefaultZoomControls />
-      </Panel>
     </MapGl>
   )
 }

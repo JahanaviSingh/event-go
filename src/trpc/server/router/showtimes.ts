@@ -147,6 +147,44 @@ export const showtimesRoutes = createTRPCRouter({
         data: showtimesInput,
       })
     }),
+  myShowtimes: protectedProcedure('manager')
+    .query(async ({ ctx }) => {
+      const session = await ctx.session
+      if (!session?.userId) {
+        throw new Error('Not authenticated')
+      }
+
+      const showtimes = await ctx.db.showtime.findMany({
+        where: {
+          Screen: {
+            Auditorium: {
+              Managers: {
+                some: {
+                  id: session.userId
+                }
+              }
+            }
+          },
+          startTime: {
+            gt: new Date() // Only future showtimes
+          }
+        },
+        include: {
+          Show: true,
+          Screen: {
+            include: {
+              Auditorium: true
+            }
+          }
+        },
+        orderBy: {
+          startTime: 'asc'
+        }
+      })
+
+      // Group showtimes by date
+      return reduceShowtimeByDate(showtimes)
+    }),
 })
 export const reduceShowtimeByDate = <T extends { startTime: Date }>(
   rawShowtimes: T[],
