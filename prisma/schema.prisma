@@ -49,9 +49,15 @@ model Auditorium{
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     name      String
+    type      String   @default("UNIVERSITY")
+    website   String?
+    phone     String?
+    openingHours String?
     Screens   Screen[]
     Address   Address?
     Managers  Manager[]
+    University University? @relation(fields: [UniversityId], references: [id])
+    UniversityId Int?
 }
 model Address {
     id            Int          @id @default(autoincrement())
@@ -68,14 +74,14 @@ model Screen {
     createdAt       DateTime        @default(now())
     updatedAt       DateTime        @updatedAt
     number          Int
-    AuditoriumId        Int
-    Auditorium    Auditorium           @relation(fields: [AuditoriumId], references: [id])
+    AuditoriumId    Int
+    Auditorium      Auditorium      @relation(fields: [AuditoriumId], references: [id])
     Seats           Seat[]
     Showtimes       Showtime[]
     projectionType  ProjectionType  @default(STANDARD)
     soundSystemType SoundSystemType @default(STANDARD)
-
-    price Float @default(180)
+    screenType      ScreenType      @default(STRAIGHT)
+    price           Float           @default(180)
 
     @@unique([AuditoriumId, number])
 }
@@ -173,6 +179,11 @@ enum SoundSystemType {
     TRI_AMP_SYSTEM
 }
 
+enum ScreenType {
+    STRAIGHT
+    CURVED
+}
+
 enum Genre {
     LECTURE
     CONFERENCE
@@ -203,4 +214,17 @@ enum Genre {
 enum ShowtimeStatus {
     POSTPONED
     CANCELLED
+}
+
+model University {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  city      String
+  state     String
+  website   String?
+  lat       Float
+  lng       Float
+  auditoriums Auditorium[]
 }

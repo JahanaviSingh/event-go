@@ -2,15 +2,15 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface ShowsState {
   selectedShowId: number | null
-  selectedShowtimeId: number | null
   selectedScreenId: number | null
+  selectedShowtimeId: number | null
   selectedSeats: Array<{ row: number; column: number }>
 }
 
 const initialState: ShowsState = {
   selectedShowId: null,
-  selectedShowtimeId: null,
   selectedScreenId: null,
+  selectedShowtimeId: null,
   selectedSeats: [],
 }
 
@@ -21,22 +21,27 @@ export const showsSlice = createSlice({
     addShowId: (state, action: PayloadAction<number>) => {
       state.selectedShowId = action.payload
     },
-    addShowtimeId: (state, action: PayloadAction<number>) => {
-      state.selectedShowtimeId = action.payload
-    },
     addScreenId: (state, action: PayloadAction<number>) => {
       state.selectedScreenId = action.payload
+    },
+    addShowtimeId: (state, action: PayloadAction<number>) => {
+      state.selectedShowtimeId = action.payload
     },
     addSeat: (state, action: PayloadAction<{ row: number; column: number }>) => {
       state.selectedSeats.push(action.payload)
     },
-    resetSeats: (state) => {
-      state.selectedSeats = []
+    removeSeat: (state, action: PayloadAction<{ row: number; column: number }>) => {
+      state.selectedSeats = state.selectedSeats.filter(
+        seat => !(seat.row === action.payload.row && seat.column === action.payload.column)
+      )
     },
     resetShows: (state) => {
       state.selectedShowId = null
-      state.selectedShowtimeId = null
       state.selectedScreenId = null
+      state.selectedShowtimeId = null
+      state.selectedSeats = []
+    },
+    resetSeats: (state) => {
       state.selectedSeats = []
     },
   },
@@ -44,11 +49,12 @@ export const showsSlice = createSlice({
 
 export const {
   addShowId,
-  addShowtimeId,
   addScreenId,
+  addShowtimeId,
   addSeat,
-  resetSeats,
+  removeSeat,
   resetShows,
+  resetSeats,
 } = showsSlice.actions
 
 export const showsReducer = showsSlice.reducer 

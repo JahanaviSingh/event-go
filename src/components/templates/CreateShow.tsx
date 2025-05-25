@@ -11,6 +11,9 @@ import { useToast } from '../molecules/Toaster/use-toast'
 import { useRouter } from 'next/navigation'
 import { revalidatePath } from '@/util/actions/revalidatePath'
 import { useFieldArray } from 'react-hook-form'
+import { useState, useEffect } from 'react'
+import Image from 'next/image'
+import { z } from 'zod'
 
 export const CreateShow = () => {
   const {
@@ -30,21 +33,33 @@ export const CreateShow = () => {
   const { toast } = useToast()
   const router = useRouter()
 
+  const onSubmit = async (data: z.infer<typeof schemaCreateShows>) => {
+    try {
+      console.log('Form data before submission:', data)
+      
+      // Submit the form
+      const result = await mutateAsync(data)
+
+      console.log('Show created:', result)
+      toast({
+        title: 'Success',
+        description: 'Show created successfully'
+      })
+      router.push('/admin/shows')
+    } catch (error) {
+      console.error('Error submitting form:', error)
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to create show',
+        variant: 'destructive'
+      })
+    }
+  }
+
   return (
     <form
-      onSubmit={handleSubmit(async (data) => {
-        console.log('errors', errors)
-        console.log('Form submitted:', data)
-        const show = await mutateAsync(data)
-        console.log('show', show)
-
-        if (show) {
-          reset()
-          toast({ title: `Show ${data.title} created successfully` })
-          revalidatePath('/admin/shows')
-          router.replace('/admin/shows')
-        }
-      })}
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-4"
     >
       <Label title="Title" error={errors.title?.message}>
         <Input placeholder="Enter Show Title" {...register('title')} />
@@ -54,16 +69,16 @@ export const CreateShow = () => {
         <Input placeholder="Enter Organizer" {...register('organizer')} />
       </Label>
 
-      {/* <Label title="Screen" error={errors.screenId?.message}>
-          <HtmlSelect {...register('screenId', { valueAsNumber: true })}>
-            <option value="">Select Screen</option>
-            {screens?.map((screen) => (
-              <option key={screen.id} value={screen.id}>
-                {screen.number}
-              </option>
-            ))}
-          </HtmlSelect>
-        </Label> */}
+      <Label title="Screen" error={errors.screenId?.message}>
+        <HtmlSelect {...register('screenId', { valueAsNumber: true })}>
+          <option value="">Select Screen</option>
+          {screens?.map((screen) => (
+            <option key={screen.id} value={screen.id}>
+              {screen.Auditorium.name} - Screen {screen.number}
+            </option>
+          ))}
+        </HtmlSelect>
+      </Label>
 
       <Label title="Showtimes" error={errors.showtimes?.message}>
         {fields.map((field, index) => (

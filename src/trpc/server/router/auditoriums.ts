@@ -43,7 +43,14 @@ export const auditoriumsRouter = createTRPCRouter({
       }
       return ctx.db.auditorium.findUnique({
         where: { id: auditoriumId },
-        include: { Address: true },
+        include: { 
+          Address: true,
+          Screens: {
+            include: {
+              Seats: true
+            }
+          }
+        },
       })
     }),
   auditoriums: protectedProcedure()
@@ -75,7 +82,7 @@ export const auditoriumsRouter = createTRPCRouter({
         return {
           ...screenData,
           Seats: { create: seats },
-          number: index,
+          number: index + 1,
         }
       })
 
@@ -121,4 +128,148 @@ export const auditoriumsRouter = createTRPCRouter({
       },
     })
   }),
+
+  deleteAuditorium: protectedProcedure('admin')
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id } = input
+
+      // First delete all related records
+      await ctx.db.$transaction([
+        // Delete all bookings for showtimes in this auditorium
+        ctx.db.booking.deleteMany({
+          where: {
+            Showtime: {
+              Screen: {
+                AuditoriumId: id
+              }
+            }
+          }
+        }),
+        // Delete all showtimes in this auditorium
+        ctx.db.showtime.deleteMany({
+          where: {
+            Screen: {
+              AuditoriumId: id
+            }
+          }
+        }),
+        // Delete all seats in this auditorium
+        ctx.db.seat.deleteMany({
+          where: {
+            Screen: {
+              AuditoriumId: id
+            }
+          }
+        }),
+        // Delete all screens in this auditorium
+        ctx.db.screen.deleteMany({
+          where: {
+            AuditoriumId: id
+          }
+        }),
+        // Delete the address
+        ctx.db.address.deleteMany({
+          where: {
+            AuditoriumId: id
+          }
+        }),
+        // Finally delete the auditorium
+        ctx.db.auditorium.delete({
+          where: { id }
+        })
+      ])
+
+      return { success: true }
+    }),
+
+  updateAuditorium: protectedProcedure('admin')
+    .input(createAuditoriumSchema.extend({
+      id: z.number()
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input
+      const session = await ctx.session
+
+      // First delete all related records
+      await ctx.db.$transaction([
+        // Delete all bookings for showtimes in this auditorium
+        ctx.db.booking.deleteMany({
+          where: {
+            Showtime: {
+              Screen: {
+                AuditoriumId: id
+              }
+            }
+          }
+        }),
+        // Delete all showtimes in this auditorium
+        ctx.db.showtime.deleteMany({
+          where: {
+            Screen: {
+              AuditoriumId: id
+            }
+          }
+        }),
+        // Delete all seats in this auditorium
+        ctx.db.seat.deleteMany({
+          where: {
+            Screen: {
+              AuditoriumId: id
+            }
+          }
+        }),
+        // Delete all screens in this auditorium
+        ctx.db.screen.deleteMany({
+          where: {
+            AuditoriumId: id
+          }
+        })
+      ])
+
+      // Update auditorium
+      const auditorium = await ctx.db.auditorium.update({
+        where: { id },
+        data: {
+          name: data.auditoriumName,
+          Managers: {
+            connectOrCreate: {
+              create: {
+                id: session.userId
+              },
+              where: {
+                id: session.userId
+              }
+            }
+          },
+          Address: {
+            upsert: {
+              create: {
+                lat: data.address.lat,
+                lng: data.address.lng,
+                address: data.address.address
+              },
+              update: {
+                lat: data.address.lat,
+                lng: data.address.lng,
+                address: data.address.address
+              }
+            }
+          },
+          Screens: {
+            create: data.screens.map((screen, index) => ({
+              number: index,
+              projectionType: screen.projectionType,
+              soundSystemType: screen.soundSystemType
+            }))
+          }
+        },
+        include: {
+          Address: true,
+          Screens: true
+        }
+      })
+
+      return auditorium
+    }),
 })

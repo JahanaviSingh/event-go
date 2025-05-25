@@ -1,13 +1,19 @@
 import { z } from 'zod'
-import { SortOrder, intFilter, stringFilter } from './common'
+import { SortOrder, dateTimeFilter, intFilter, stringFilter } from './common'
 import { ProjectionType, SoundSystemType } from '@prisma/client'
 
 const auditoriumOrderByWithRelationInputSchema = z.object({
   id: SortOrder,
+  name: SortOrder,
+  createdAt: SortOrder,
+  updatedAt: SortOrder,
 })
 
 const auditoriumWhereInputSchemaPrimitive = z.object({
   id: intFilter,
+  name: stringFilter,
+  createdAt: dateTimeFilter,
+  updatedAt: dateTimeFilter,
 })
 
 const addressWhere = z.object({

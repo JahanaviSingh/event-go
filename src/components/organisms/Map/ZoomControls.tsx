@@ -5,6 +5,7 @@ import {
   IconMinus,
   IconPlus,
   IconSoup,
+  IconTarget,
 } from '@tabler/icons-react'
 import { useMap } from 'react-map-gl/maplibre'
 import type { LngLat } from 'mapbox-gl'
@@ -44,24 +45,28 @@ const ZoomOut = () => {
   )
 }
 
-export const CenterOfMap = ({
-  onClick,
-}: {
-  onClick: (latLng: { lng: number; lat: number }) => void
-}) => {
+interface CenterOfMapProps {
+  onClick?: (latLng: { lat: number; lng: number; formattedAddress?: string }) => void
+}
+
+export const CenterOfMap = ({ onClick }: CenterOfMapProps) => {
   const { current: map } = useMap()
+
+  if (!map) return null
+
   return (
     <button
-      className=" hover:bg-white"
-      type="button"
       onClick={() => {
-        const center = map?.getCenter()
-        if (center) {
-          onClick({ lat: center.lat, lng: center.lng })
-        }
+        const center = map.getCenter()
+        onClick?.({
+          lat: center.lat,
+          lng: center.lng,
+          formattedAddress: `${center.lat}, ${center.lng}`
+        })
       }}
+      className="p-2 rounded-lg bg-white shadow-lg hover:bg-gray-50"
     >
-      <IconFocusCentered className="w-8 h-8 p-1.5 text-black" />
+      <IconTarget className="w-5 h-5" />
     </button>
   )
 }

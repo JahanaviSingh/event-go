@@ -5,6 +5,7 @@ import { screensRouter } from './screens'
 import { auditoriumsRouter } from './auditoriums'
 import { managersRouter } from './managers'
 import { showtimesRoutes } from './showtimes'
+import { geocodingRouter } from './geocoding'
 
 export const appRouter = createTRPCRouter({
   shows: showsRouter,
@@ -13,5 +14,6 @@ export const appRouter = createTRPCRouter({
   auditoriums: auditoriumsRouter,
   managers: managersRouter,
   showtimes: showtimesRoutes,
+  geocoding: geocodingRouter,
 })
 export type AppRouter = typeof appRouter

@@ -6,26 +6,51 @@ import { AlertBox } from '../molecules/AlertBox'
 import { RouterOutputs } from '@/trpc/clients/types'
 import { trpcClient } from '@/trpc/clients/client'
 import { formatDate } from '@/util/function'
-import { AuditoriumInfo } from '../organisms/AuditoriumInfo'
+import { AuditoriumInfo } from '@/components/organisms/AuditoriumInfo'
+import { Auditorium } from '@prisma/client'
+import { Loader } from '@/components/molecules/Loader'
 
 export interface IListShowsProps {
   auditoriums: RouterOutputs['auditoriums']['auditoriums']
 }
 
 export const ListAuditoriums = ({ auditoriums }: IListShowsProps) => {
-  return (
-    <div>
-      <div>
-        {auditoriums.length === 0 ? (
-          <div>You have not created any auditoriums yet.</div>
-        ) : null}
-      </div>
+  const { data: showtimes, isLoading } = trpcClient.showtimes.showtimes.useQuery({
+    where: {},
+    include: {
+      Show: true,
+      Screen: {
+        include: {
+          Auditorium: true
+        }
+      }
+    }
+  })
 
-      <div className="flex flex-col gap-3">
-        {auditoriums.map((auditorium) => (
-          <AuditoriumInfo auditorium={auditorium} key={auditorium.id} />
-        ))}
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <Loader className="w-6 h-6" />
       </div>
+    )
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-6">
+      {auditoriums.map((auditorium) => (
+        <div
+          key={auditorium.id}
+          className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+        >
+          <AuditoriumInfo
+            auditorium={auditorium}
+            showtimes={showtimes?.filter(
+              (showtime) =>
+                showtime.Screen.Auditorium.id === auditorium.id
+            )}
+          />
+        </div>
+      ))}
     </div>
   )
 }

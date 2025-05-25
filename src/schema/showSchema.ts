@@ -12,10 +12,9 @@ export const schemaCreateShows = z.object({
       }),
     }),
   ),
-  // screenId: z.number({ invalid_type_error: 'Screen ID is required' }),
+  screenId: z.number({ invalid_type_error: 'Screen ID is required' }),
   duration: z.number({
     invalid_type_error: 'Duration is required and must be a number',
   }),
-  releaseDate: z.string(),
-  // posterUrl: z.string().optional().nullable(),
+  releaseDate: z.string()
 })

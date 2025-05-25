@@ -1,16 +1,35 @@
-import { createTRPCRouter, protectedProcedure, publicProcedure } from '..'
 import { z } from 'zod'
+import { createTRPCRouter, protectedProcedure, publicProcedure } from '..'
 import { Prisma } from '@prisma/client'
 
 const serverSchemaCreateShowtime = z.object({
-  showtimes: z.array(z.object({
-    time: z.string().refine((val) => !isNaN(Date.parse(val)), {
-      message: "Invalid date format"
-    })
-  })),
-  screenId: z.number(),
   showId: z.number(),
+  screenId: z.number(),
+  showtimes: z.array(
+    z.object({
+      time: z.string(),
+    })
+  ),
 })
+
+const reduceShowtimeByDate = <T extends { startTime: Date }>(
+  rawShowtimes: T[],
+) => {
+  const showtimesByDate: Record<string, T[]> = {}
+
+  rawShowtimes.forEach((showtime) => {
+    const date = showtime.startTime.toISOString().split('T')[0]
+    if (!showtimesByDate[date]) {
+      showtimesByDate[date] = []
+    }
+    showtimesByDate[date].push(showtime)
+  })
+
+  return Object.entries(showtimesByDate).map(([date, showtimes]) => ({
+    date,
+    showtimes,
+  }))
+}
 
 export const showtimesRoutes = createTRPCRouter({
   seats: publicProcedure
@@ -185,26 +204,31 @@ export const showtimesRoutes = createTRPCRouter({
       // Group showtimes by date
       return reduceShowtimeByDate(showtimes)
     }),
+  showtimes: publicProcedure
+    .input(z.object({
+      where: z.object({
+        Show: z.object({
+          id: z.number()
+        }).optional(),
+        Screen: z.object({
+          AuditoriumId: z.number()
+        }).optional()
+      }).optional()
+    }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.showtime.findMany({
+        where: input.where,
+        include: {
+          Show: true,
+          Screen: {
+            include: {
+              Auditorium: true
+            }
+          }
+        },
+        orderBy: {
+          startTime: 'asc'
+        }
+      })
+    }),
 })
-export const reduceShowtimeByDate = <T extends { startTime: Date }>(
-  rawShowtimes: T[],
-) => {
-  return rawShowtimes.reduce(
-    (grouped, showtime) => {
-      const date = showtime.startTime.toISOString().split('T')[0]
-
-      if (!grouped[date]) {
-        grouped[date] = { date, showtimes: [] }
-      }
-      grouped[date].showtimes.push(showtime)
-
-      return grouped
-    },
-    {} as {
-      [date: string]: {
-        date: string
-        showtimes: T[]
-      }
-    },
-  )
-}

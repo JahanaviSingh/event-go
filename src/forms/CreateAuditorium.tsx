@@ -10,6 +10,7 @@ export const schemaCreateAddress = z.object({
   lng: z.number(),
   address: z.string(),
 })
+
 export const schemaCreateAuditorium = z.object({
   auditoriumName: z.string().min(1, { message: 'Auditorium name is required' }),
   managerId: z
@@ -18,6 +19,7 @@ export const schemaCreateAuditorium = z.object({
   address: schemaCreateAddress,
   screens: z.array(schemaCreateScreen),
 })
+
 export type FormTypeCreateAuditorium = z.infer<typeof schemaCreateAuditorium>
 
 export const useFormCreateAuditorium = () =>
