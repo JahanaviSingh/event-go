@@ -4,16 +4,17 @@ import { Button } from '@/components/atoms/button'
 import { useToast } from '@/components/molecules/Toaster/use-toast'
 import { useRouter } from 'next/navigation'
 import { revalidatePath } from '@/util/actions/revalidatePath'
-// import { DataTable } from '@/components/molecules/DataTable'
+import { DataTable } from '@/components/molecules/DataTable'
 import { ColumnDef } from '@tanstack/react-table'
 import { User } from '@prisma/client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Input } from '@/components/atoms/input'
 import { Label } from '@/components/atoms/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/atoms/Dialog'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useUser } from '@clerk/nextjs'
 
 const createAdminSchema = z.object({
   email: z.string().email(),
@@ -23,14 +24,19 @@ const createAdminSchema = z.object({
 
 type CreateAdminForm = z.infer<typeof createAdminSchema>
 
-const columns: ColumnDef<User>[] = [
+interface AdminWithUser {
+  id: string
+  createdAt: Date
+  User: {
+    id: string
+    name: string
+  }
+}
+
+const columns: ColumnDef<AdminWithUser>[] = [
   {
-    accessorKey: 'name',
+    accessorKey: 'User.name',
     header: 'Name',
-  },
-  {
-    accessorKey: 'email',
-    header: 'Email',
   },
   {
     accessorKey: 'createdAt',

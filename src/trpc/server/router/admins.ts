@@ -23,4 +23,19 @@ export const adminsRouter = createTRPCRouter({
     }
     return ctx.db.admin.findUnique({ where: { id: ctx.userId } })
   }),
+  listAdmins: protectedProcedure('admin').query(async ({ ctx }) => {
+    return ctx.db.admin.findMany({
+      include: {
+        User: {
+          select: {
+            id: true,
+            name: true,
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+  }),
 })
