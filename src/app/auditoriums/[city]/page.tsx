@@ -1,19 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, use } from 'react'
 import { trpcClient } from '@/trpc/clients/client'
 import { Loader } from '@/components/molecules/Loader'
 import { IconBuildingEstate, IconMapPin, IconClock, IconCalendar, IconTicket } from '@tabler/icons-react'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import Image from 'next/image'
-import { use } from 'react'
+import { useRouter } from 'next/navigation'
 import { Genre } from '@prisma/client'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/atoms/Dialog'
 import { Button } from '@/components/atoms/button'
 import { BookingStepper } from '@/components/templates/SearchAuditorium'
+import { toast } from 'sonner'
 
-interface CityAuditoriumsPageProps {
+interface AuditoriumsPageProps {
   params: Promise<{
     city: string
   }>
@@ -28,19 +29,189 @@ const categories = [
   { id: Genre.FEST, name: 'Fest', icon: '🎉' },
 ]
 
-export default function CityAuditoriumsPage({ params }: CityAuditoriumsPageProps) {
+export default function AuditoriumsPage({ params }: AuditoriumsPageProps) {
+  const router = useRouter()
   const resolvedParams = use(params)
+  const [lat, setLat] = useState<number | null>(null)
+  const [lng, setLng] = useState<number | null>(null)
   const [cityName, setCityName] = useState(decodeURIComponent(resolvedParams.city))
   const [selectedCategory, setSelectedCategory] = useState<Genre>(Genre.CULTURAL)
-  const { data: shows, isLoading } = trpcClient.shows.shows.useQuery({
-    city: cityName,
-    category: selectedCategory,
+  const [selectedShow, setSelectedShow] = useState<{
+    id: number
+    title: string
+    genre: string
+    organizer: string
+    duration: number
+    releaseDate: string
+    posterUrl: string | null
+  } | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  console.log('=== Auditoriums Page Debug ===')
+  console.log('City from URL:', cityName)
+
+  // Get coordinates for the city
+  const { data: coordinates, error: geocodingError, isLoading: isGeocodingLoading } = trpcClient.geocoding.getCoordinates.useQuery(
+    { city: cityName },
+    {
+      onSuccess: (data) => {
+        console.log('Geocoding result:', data)
+        if (data) {
+          console.log('Setting coordinates:', data)
+          setLat(data.lat)
+          setLng(data.lng)
+        } else {
+          console.log('No coordinates found for city:', cityName)
+        }
+      },
+      onError: (error) => {
+        console.error('Geocoding error:', error)
+        toast.error('Could not find location coordinates')
+      }
+    }
+  )
+
+  console.log('Geocoding state:', {
+    isLoading: isGeocodingLoading,
+    error: geocodingError,
+    coordinates,
+    lat,
+    lng
   })
 
-  if (isLoading) {
+  // Get shows for the city
+  const { data: showsData, isLoading: isShowsLoading, error: showsError } = trpcClient.shows.shows.useQuery(
+    {
+      lat: lat ?? undefined,
+      lng: lng ?? undefined,
+      city: cityName
+    },
+    {
+      enabled: !!cityName,
+      onSuccess: (data) => {
+        console.log('Shows query result:', {
+          totalMatchingShows: data.matchingShows.length,
+          totalAllShows: data.allShows.length,
+          hasNearbyShows: data.hasNearbyShows,
+          matchingShows: data.matchingShows.map(show => ({
+            id: show.id,
+            title: show.title,
+            showtimes: show.Showtimes.map(st => ({
+              id: st.id,
+              screen: st.Screen?.number,
+              auditorium: st.Screen?.Auditorium?.name,
+              address: st.Screen?.Auditorium?.Address?.address
+            }))
+          }))
+        })
+      },
+      onError: (error) => {
+        console.error('Shows query error:', error)
+      }
+    }
+  )
+
+  console.log('Shows query state:', {
+    isLoading: isShowsLoading,
+    error: showsError,
+    hasData: !!showsData,
+    totalMatchingShows: showsData?.matchingShows.length,
+    totalAllShows: showsData?.allShows.length
+  })
+
+  const matchingShows = showsData?.matchingShows ?? []
+  const allShows = showsData?.allShows ?? []
+  const hasNearbyShows = showsData?.hasNearbyShows ?? true
+
+  const { data: showtimes } = trpcClient.showtimes.showtimes.useQuery(
+    {
+      where: {
+        Show: {
+          id: selectedShow?.id
+        }
+      }
+    },
+    {
+      enabled: !!selectedShow?.id
+    }
+  )
+
+  const handleBookNow = (show: typeof selectedShow) => {
+    setSelectedShow(show)
+    if (!showtimes || showtimes.length === 0) {
+      toast.error('No showtimes available for this show')
+      return
+    }
+    setIsDialogOpen(true)
+  }
+
+  if (isGeocodingLoading || isShowsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader className="w-8 h-8" />
+      </div>
+    )
+  }
+
+  if (geocodingError) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Error Finding Location</h1>
+            <p className="text-gray-600 mb-8">
+              We couldn't find the coordinates for {cityName}. Please try another location.
+            </p>
+            <Button
+              onClick={() => router.push('/')}
+              variant="outline"
+            >
+              Back to Home
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (showsError) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Error Loading Shows</h1>
+            <p className="text-gray-600 mb-8">
+              There was an error loading shows for {cityName}. Please try again later.
+            </p>
+            <Button
+              onClick={() => router.push('/')}
+              variant="outline"
+            >
+              Back to Home
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!matchingShows.length && !allShows.length) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">No Shows Available</h1>
+            <p className="text-gray-600 mb-8">
+              We couldn't find any shows in {cityName}. Please try another location.
+            </p>
+            <Button
+              onClick={() => router.push('/')}
+              variant="outline"
+            >
+              Back to Home
+            </Button>
+          </div>
+        </div>
       </div>
     )
   }
@@ -77,21 +248,28 @@ export default function CityAuditoriumsPage({ params }: CityAuditoriumsPageProps
         </div>
       </div>
 
-      {/* Featured Shows */}
-      <div className="container mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold mb-6">Featured Shows</h2>
+      {/* Shows in City */}
+      <div className="container mx-auto px-4 py-4">
+        
+        <h2 className="text-2xl font-bold mb-6">Shows in {cityName}</h2>
+        {!hasNearbyShows ? (
+          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
+            <p>No shows found in {cityName}. Showing all available shows instead.</p>
+          </div>
+        ):(
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {shows?.slice(0, 4).map((show) => (
+          {matchingShows.map((show) => (
             <Link
               key={show.id}
               href={`/shows/${show.id}`}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              className="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
             >
               <div className="relative h-48">
                 <Image
                   src={show.posterUrl || '/film.png'}
                   alt={show.title}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                   className="object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -112,17 +290,16 @@ export default function CityAuditoriumsPage({ params }: CityAuditoriumsPageProps
               </div>
             </Link>
           ))}
-        </div>
+        </div>)}
       </div>
 
       {/* All Shows */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4">
         <h2 className="text-2xl font-bold mb-6">All Shows</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {shows?.map((show) => (
-            <Link
+          {allShows.map((show) => (
+            <div
               key={show.id}
-              href={`/shows/${show.id}`}
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
             >
               <div className="flex gap-4 p-4">
@@ -131,6 +308,7 @@ export default function CityAuditoriumsPage({ params }: CityAuditoriumsPageProps
                     src={show.posterUrl || '/film.png'}
                     alt={show.title}
                     fill
+                    sizes="96px"
                     className="object-cover rounded"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
@@ -154,22 +332,17 @@ export default function CityAuditoriumsPage({ params }: CityAuditoriumsPageProps
                       <span>From ₹199</span>
                     </div>
                     <div className="mt-4">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button className="w-full">Book Now</Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-3xl">
-                          <DialogHeader>
-                            <DialogTitle>Book Tickets for {show.title}</DialogTitle>
-                          </DialogHeader>
-                          <BookingStepper auditoriumId={show.auditoriumId} />
-                        </DialogContent>
-                      </Dialog>
+                      <Button 
+                        className="w-full"
+                        onClick={() => handleBookNow(show)}
+                      >
+                        Book Now
+                      </Button>
                     </div>
                   </div>
                 </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       </div>
@@ -198,6 +371,27 @@ export default function CityAuditoriumsPage({ params }: CityAuditoriumsPageProps
           </div>
         </div>
       </div>
+
+      {/* Booking Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-3xl" aria-describedby="booking-dialog-description">
+          <DialogHeader>
+            <DialogTitle>Book Tickets for {selectedShow?.title}</DialogTitle>
+            <p id="booking-dialog-description" className="sr-only">
+              Book tickets for {selectedShow?.title}. Select your preferred date, time, and seats.
+            </p>
+          </DialogHeader>
+          {selectedShow && (
+            <BookingStepper 
+              show={selectedShow} 
+              onClose={() => {
+                setIsDialogOpen(false)
+                setSelectedShow(null)
+              }} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 } 

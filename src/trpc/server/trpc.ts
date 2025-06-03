@@ -1,26 +1,37 @@
 import { initTRPC, TRPCError } from '@trpc/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getAuth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
+import { type NextRequest } from 'next/server'
 
-const t = initTRPC.create()
+type Context = {
+  req: NextRequest
+}
 
-const isAuthed = t.middleware(async ({ next }) => {
-  const session = await getServerSession(authOptions)
+const t = initTRPC.context<Context>().create()
 
-  if (!session?.user) {
+const isAuthed = t.middleware(async ({ next, ctx }) => {
+  try {
+    const { userId } = getAuth(ctx.req)
+
+    if (!userId) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'You must be logged in to access this resource',
+      })
+    }
+
+    return next({
+      ctx: {
+        userId,
+        db: prisma,
+      },
+    })
+  } catch (error) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
-      message: 'You must be logged in to access this resource',
+      message: 'Authentication failed',
     })
   }
-
-  return next({
-    ctx: {
-      session,
-      db: prisma,
-    },
-  })
 })
 
 export const createTRPCRouter = t.router

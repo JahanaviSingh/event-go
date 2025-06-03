@@ -31,26 +31,9 @@ model Manager {
   id           String      @id
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
-  AuditoriumId Int?
-  Auditorium   Auditorium? @relation(fields: [AuditoriumId], references: [id])
   User         User        @relation(fields: [id], references: [id])
+  Auditoriums  Auditorium[]
 }
-<<<<<<< Updated upstream
-model Auditorium{
-  id        Int      @id @default(autoincrement())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    name      String
-    type      String   @default("UNIVERSITY")
-    website   String?
-    phone     String?
-    openingHours String?
-    Screens   Screen[]
-    Address   Address?
-    Managers  Manager[]
-    University University? @relation(fields: [UniversityId], references: [id])
-    UniversityId Int?
-=======
 
 model Auditorium {
   id           Int         @id @default(autoincrement())
@@ -66,7 +49,6 @@ model Auditorium {
   University   University? @relation(fields: [UniversityId], references: [id])
   Managers     Manager[]
   Screens      Screen[]
->>>>>>> Stashed changes
 }
 
 model Address {
@@ -81,22 +63,6 @@ model Address {
 }
 
 model Screen {
-<<<<<<< Updated upstream
-    id              Int             @id @default(autoincrement())
-    createdAt       DateTime        @default(now())
-    updatedAt       DateTime        @updatedAt
-    number          Int
-    AuditoriumId    Int
-    Auditorium      Auditorium      @relation(fields: [AuditoriumId], references: [id])
-    Seats           Seat[]
-    Showtimes       Showtime[]
-    projectionType  ProjectionType  @default(STANDARD)
-    soundSystemType SoundSystemType @default(STANDARD)
-    screenType      ScreenType      @default(STRAIGHT)
-    price           Float           @default(180)
-
-    @@unique([AuditoriumId, number])
-=======
   id              Int             @id @default(autoincrement())
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
@@ -111,7 +77,6 @@ model Screen {
   Showtimes       Showtime[]
 
   @@unique([AuditoriumId, number])
->>>>>>> Stashed changes
 }
 
 model Seat {
@@ -250,30 +215,7 @@ enum Genre {
 }
 
 enum ShowtimeStatus {
-<<<<<<< Updated upstream
-    POSTPONED
-    CANCELLED
-}
-
-model University {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String
-  city      String
-  state     String
-  website   String?
-  lat       Float
-  lng       Float
-  auditoriums Auditorium[]
-}
-=======
   POSTPONED
   CANCELLED
 }
 
-enum ScreenType {
-  STRAIGHT
-  CURVED
-}
->>>>>>> Stashed changes

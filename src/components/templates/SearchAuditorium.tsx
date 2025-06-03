@@ -503,7 +503,7 @@ export const BookingStepper = ({
     } | null
   } | null>(null)
 
-  const { data: auditoriums, isLoading } = trpcClient.auditoriums.searchAuditoriums.useQuery({
+  const { data: auditoriums, isLoading: isLoadingAuditoriums } = trpcClient.auditoriums.searchAuditoriums.useQuery({
     where: {},
     addressWhere: {
       ne_lat: 0,
@@ -513,7 +513,20 @@ export const BookingStepper = ({
     },
   })
 
-  if (isLoading) return <LoaderPanel />
+  const { data: showtimes, isLoading: isLoadingShowtimes } = trpcClient.showtimes.showtimes.useQuery(
+    {
+      where: {
+        Show: {
+          id: show.id
+        }
+      }
+    },
+    {
+      enabled: !!show.id
+    }
+  )
+
+  if (isLoadingAuditoriums || isLoadingShowtimes) return <LoaderPanel />
 
   if (!auditoriums || auditoriums.length === 0) {
     return (
@@ -521,6 +534,41 @@ export const BookingStepper = ({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>No Auditoriums Available</DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-600">
+            {noShowsMessages[Math.floor(Math.random() * noShowsMessages.length)]}
+          </p>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  if (!showtimes || showtimes.length === 0) {
+    return (
+      <Dialog open={true} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>No Showtimes Available</DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-600">
+            {noShowsMessages[Math.floor(Math.random() * noShowsMessages.length)]}
+          </p>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  // Filter auditoriums that have showtimes for this show
+  const availableAuditoriums = auditoriums.filter(auditorium => 
+    showtimes.some(showtime => showtime.Screen.AuditoriumId === auditorium.id)
+  )
+
+  if (availableAuditoriums.length === 0) {
+    return (
+      <Dialog open={true} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>No Available Auditoriums</DialogTitle>
           </DialogHeader>
           <p className="text-gray-600">
             {noShowsMessages[Math.floor(Math.random() * noShowsMessages.length)]}
@@ -541,7 +589,7 @@ export const BookingStepper = ({
             <div className="space-y-4">
               <h3 className="font-medium">Select Auditorium</h3>
               <div className="grid grid-cols-1 gap-2">
-                {auditoriums.map((auditorium) => (
+                {availableAuditoriums.map((auditorium) => (
                   <div
                     key={auditorium.id}
                     className={`flex border p-4 rounded cursor-pointer ${

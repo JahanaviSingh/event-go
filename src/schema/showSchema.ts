@@ -16,5 +16,6 @@ export const schemaCreateShows = z.object({
   duration: z.number({
     invalid_type_error: 'Duration is required and must be a number',
   }),
-  releaseDate: z.string()
+  releaseDate: z.string(),
+  posterUrl: z.string().optional(),
 })

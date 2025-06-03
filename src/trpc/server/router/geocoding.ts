@@ -297,4 +297,53 @@ export const geocodingRouter = createTRPCRouter({
         throw error
       }
     }),
+
+  getCoordinates: publicProcedure
+    .input(
+      z.object({
+        city: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      console.log('Getting coordinates for city:', input.city)
+      
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input.city)}&limit=1`,
+          {
+            headers: {
+              'Accept-Language': 'en-US,en;q=0.9',
+              'User-Agent': 'EventGo/1.0'
+            }
+          }
+        )
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch coordinates')
+        }
+
+        const data = await response.json()
+        
+        if (!data || data.length === 0) {
+          console.log('No coordinates found for city:', input.city)
+          return null
+        }
+
+        const result = {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon),
+          formattedAddress: data[0].display_name,
+        }
+
+        console.log('Found coordinates:', result)
+        return result
+      } catch (error) {
+        console.error('Error in getCoordinates:', error)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to get coordinates for city',
+          cause: error
+        })
+      }
+    }),
 }) 

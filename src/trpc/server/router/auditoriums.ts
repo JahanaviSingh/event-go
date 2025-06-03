@@ -101,33 +101,59 @@ export const auditoriumsRouter = createTRPCRouter({
       })
     }),
   myAuditoriums: protectedProcedure()
-    .input(findManyAuditoriumArgsSchema.omit({ addressWhere: true }))
-    .query(({ ctx, input }) => {
+    .input(findManyAuditoriumArgsSchema.omit({ addressWhere: true }).optional())
+    .query(async ({ ctx, input }) => {
+      const session = await ctx.session
+      if (!session?.userId) {
+        throw new Error('Not authenticated')
+      }
+
       return ctx.db.auditorium.findMany({
         ...input,
         where: {
-          ...input.where,
-          id: typeof input.where?.id === 'number' ? input.where.id : undefined,
-          Managers: { some: { id: ctx.session.userId } },
+          ...input?.where,
+          Managers: {
+            some: {
+              id: session.userId
+            }
+          }
         },
         include: {
-          Screens: { include: { Showtimes: { include: { Show: true } } } },
-        },
+          Address: true,
+          Screens: {
+            include: {
+              Showtimes: {
+                include: {
+                  Show: true
+                }
+              }
+            }
+          }
+        }
       })
     }),
 
-  myScreens: protectedProcedure().query(({ ctx }) => {
-    return ctx.db.screen.findMany({
-      where: {
-        Auditorium: {
-          Managers: { some: { id: ctx.session.userId } },
+  myScreens: publicProcedure
+    .input(z.object({ auditoriumId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      if (input.auditoriumId <= 0) {
+        return []
+      }
+      return ctx.db.screen.findMany({
+        where: {
+          AuditoriumId: input.auditoriumId
         },
-      },
-      include: {
-        Auditorium: true,
-      },
-    })
-  }),
+        include: {
+          Auditorium: true,
+          Seats: true,
+          Showtimes: {
+            include: {
+              Show: true
+            }
+          }
+        }
+      })
+    }),
 
   deleteAuditorium: protectedProcedure('admin')
     .input(z.object({ id: z.number() }))

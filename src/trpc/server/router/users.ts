@@ -1,54 +1,90 @@
 import { z } from 'zod'
-import { createTRPCRouter, protectedProcedure } from '../trpc'
+import { createTRPCRouter, protectedProcedure } from '..'
 import { TRPCError } from '@trpc/server'
 
 export const usersRouter = createTRPCRouter({
-  getProfile: protectedProcedure.query(async ({ ctx }) => {
-    const user = await ctx.db.user.findUnique({
-      where: { id: ctx.session.user.id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-        preferences: true,
-      },
-    })
+  getProfile: protectedProcedure().query(async ({ ctx }) => {
+    try {
+      if (!ctx.userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User ID not found in context',
+        })
+      }
 
-    if (!user) {
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.userId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+          preferences: true,
+        },
+      })
+
+      if (!user) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'User not found',
+        })
+      }
+
+      return user
+    } catch (error) {
+      console.error('Error in getProfile:', error)
+      if (error instanceof TRPCError) {
+        throw error
+      }
       throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'User not found',
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to fetch user profile',
       })
     }
-
-    return user
   }),
 
-  getBookings: protectedProcedure.query(async ({ ctx }) => {
-    const bookings = await ctx.db.booking.findMany({
-      where: { userId: ctx.session.user.id },
-      include: {
-        Showtime: {
-          include: {
-            Show: true,
-            Screen: {
-              include: {
-                Auditorium: true,
+  getBookings: protectedProcedure().query(async ({ ctx }) => {
+    try {
+      if (!ctx.userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User ID not found in context',
+        })
+      }
+
+      const bookings = await ctx.db.booking.findMany({
+        where: { userId: ctx.userId },
+        include: {
+          Showtime: {
+            include: {
+              Show: true,
+              Screen: {
+                include: {
+                  Auditorium: true,
+                },
               },
             },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
+        orderBy: {
+          createdAt: 'desc',
+        },
+      })
 
-    return bookings
+      return bookings
+    } catch (error) {
+      console.error('Error in getBookings:', error)
+      if (error instanceof TRPCError) {
+        throw error
+      }
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to fetch bookings',
+      })
+    }
   }),
 
-  updatePreferences: protectedProcedure
+  updatePreferences: protectedProcedure()
     .input(
       z.object({
         favoriteGenre: z.string().optional(),
@@ -62,13 +98,31 @@ export const usersRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.db.user.update({
-        where: { id: ctx.session.user.id },
-        data: {
-          preferences: input,
-        },
-      })
+      try {
+        if (!ctx.userId) {
+          throw new TRPCError({
+            code: 'UNAUTHORIZED',
+            message: 'User ID not found in context',
+          })
+        }
 
-      return user
+        const user = await ctx.db.user.update({
+          where: { id: ctx.userId },
+          data: {
+            preferences: input,
+          },
+        })
+
+        return user
+      } catch (error) {
+        console.error('Error in updatePreferences:', error)
+        if (error instanceof TRPCError) {
+          throw error
+        }
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to update preferences',
+        })
+      }
     }),
 }) 

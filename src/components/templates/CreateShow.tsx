@@ -11,9 +11,10 @@ import { useToast } from '../molecules/Toaster/use-toast'
 import { useRouter } from 'next/navigation'
 import { revalidatePath } from '@/util/actions/revalidatePath'
 import { useFieldArray } from 'react-hook-form'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { z } from 'zod'
+import { IconUpload, IconX } from '@tabler/icons-react'
 
 export const CreateShow = () => {
   const {
@@ -22,6 +23,7 @@ export const CreateShow = () => {
     handleSubmit,
     reset,
     formState: { errors },
+    setValue,
   } = useFormCreateShow()
 
   const { fields, append, remove } = useFieldArray({
@@ -32,6 +34,34 @@ export const CreateShow = () => {
   const { mutateAsync, isLoading } = trpcClient.shows.createShow.useMutation()
   const { toast } = useToast()
   const router = useRouter()
+
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      alert('Please select a valid image file.')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB.')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      setPreviewUrl(ev.target?.result as string)
+      setValue('posterUrl', ev.target?.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleRemoveImage = () => {
+    setPreviewUrl(null)
+    setValue('posterUrl', '')
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   const onSubmit = async (data: z.infer<typeof schemaCreateShows>) => {
     try {
@@ -128,6 +158,49 @@ export const CreateShow = () => {
           ))}
         </HtmlSelect>
       </Label>
+
+      <div className="mb-4">
+        <label className="block font-medium mb-1">Poster Image</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="Paste image URL or upload"
+            {...register('posterUrl', { pattern: { value: /^data:image\/.+;base64,|https?:\/\//, message: 'Enter a valid image URL or upload a file.' } })}
+            className="input input-bordered w-full"
+            onChange={e => {
+              setPreviewUrl(e.target.value)
+              setValue('posterUrl', e.target.value)
+            }}
+            value={previewUrl ?? ''}
+          />
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <IconUpload className="w-5 h-5" />
+            Upload
+          </button>
+          {previewUrl && (
+            <button type="button" className="btn btn-ghost" onClick={handleRemoveImage}>
+              <IconX className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+        {previewUrl && (
+          <div className="mt-2">
+            <img src={previewUrl} alt="Poster Preview" className="max-h-48 rounded shadow" />
+          </div>
+        )}
+        {errors.posterUrl && <p className="text-red-500 text-sm mt-1">{errors.posterUrl.message}</p>}
+      </div>
 
       <Button loading={isLoading} type="submit">
         Create Show

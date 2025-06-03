@@ -1,111 +1,200 @@
 'use client'
 
+import { useEffect, useState, use } from 'react'
 import { trpcClient } from '@/trpc/clients/client'
-import { LoaderPanel } from '@/components/molecules/Loader'
-import { format, parseISO } from 'date-fns'
+import { Loader } from '@/components/molecules/Loader'
+import { IconClock, IconCalendar, IconMapPin, IconTicket } from '@tabler/icons-react'
+import { format } from 'date-fns'
 import Image from 'next/image'
-import { IconClock, IconCalendar, IconTicket } from '@tabler/icons-react'
 import { Button } from '@/components/atoms/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/atoms/Dialog'
+import { toast } from 'sonner'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/atoms/Dialog'
 import { BookingStepper } from '@/components/templates/SearchAuditorium'
-import { use } from 'react'
-import { useToast } from '@/components/molecules/Toaster/use-toast'
+import { useRouter } from 'next/navigation'
+import { useAppDispatch } from '@/store'
 
-export default function ShowPage({ params }: { params: Promise<{ id: string }> }) {
+interface ShowPageProps {
+  params: Promise<{
+    id: string
+  }>
+}
+
+export default function ShowPage({ params }: ShowPageProps) {
   const resolvedParams = use(params)
-  const { toast } = useToast()
-  const { data: show, isLoading } = trpcClient.shows.shows.useQuery({
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const router = useRouter()
+  const dispatch = useAppDispatch()
+
+  const { data: showData, isLoading } = trpcClient.shows.shows.useQuery({
     id: parseInt(resolvedParams.id)
   })
 
-  if (isLoading) return <LoaderPanel />
+  const show = showData?.shows?.[0]
 
-  if (!show) {
+  const { data: showtimes } = trpcClient.showtimes.showtimes.useQuery(
+    {
+      where: {
+        Show: {
+          id: parseInt(resolvedParams.id)
+        }
+      }
+    },
+    {
+      enabled: !!resolvedParams.id
+    }
+  )
+
+  if (isLoading || !show) {
     return (
-      <div className="container mx-auto p-6">
-        <h1 className="text-2xl font-bold text-red-600">Show not found</h1>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader className="w-8 h-8" />
       </div>
     )
   }
 
-  const releaseDate = show.releaseDate ? parseISO(show.releaseDate) : null
-
-  const handleBookingClick = () => {
-    if (!show.Screen?.Auditorium?.id) {
-      toast({
-        title: "Cannot book tickets",
-        description: "This show is not associated with any auditorium",
-        variant: "destructive"
-      })
-      return
+  // Format release date safely
+  const formatReleaseDate = (dateString: string | Date | null) => {
+    if (!dateString) return 'Date not available'
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) {
+        console.error('Invalid date:', dateString)
+        return 'Invalid date'
+      }
+      return format(date, 'MMM d, yyyy')
+    } catch (error) {
+      console.error('Error formatting date:', error)
+      return 'Date not available'
     }
+  }
+
+  // Format genre for display
+  const formatGenre = (genre: string | null | undefined) => {
+    if (!genre) return 'Not specified'
+    return genre
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
+  }
+
+  // Get unique dates from showtimes
+  const availableDates = Array.from(new Set(
+    showtimes?.map(st => format(new Date(st.startTime), 'yyyy-MM-dd')) ?? []
+  )).sort()
+
+  // Get showtimes for selected date
+  const dateShowtimes = showtimes?.filter(st => 
+    selectedDate && format(new Date(st.startTime), 'yyyy-MM-dd') === selectedDate
+  ) ?? []
+
+  const handleShowtimeSelect = (showtimeId: number) => {
+    dispatch({ type: 'shows/addShowtimeId', payload: showtimeId })
+    router.push(`/shows/${resolvedParams.id}/seatlayout`)
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary to-primary-dark text-white py-12">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-2">{show.title}</h1>
-          <p className="text-lg opacity-90">{show.organizer}</p>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Show Poster */}
-          <div className="md:col-span-1">
-            <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg">
+      {/* Show Details Header */}
+      <div className="bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex gap-6">
+            <div className="relative w-48 h-72 flex-shrink-0">
               <Image
                 src={show.posterUrl || '/film.png'}
-                alt={`Poster for ${show.title} - ${show.genre} show by ${show.organizer}`}
+                alt={`Poster for ${show.title || 'Untitled Show'}`}
                 fill
-                className="object-cover"
+                sizes="192px"
+                className="object-cover rounded-lg"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.src = '/film.png';
                 }}
               />
             </div>
-          </div>
-
-          {/* Show Details */}
-          <div className="md:col-span-2">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="space-y-4">
+            <div className="flex-grow">
+              <h1 className="text-3xl font-bold mb-4">{show.title}</h1>
+              <div className="space-y-3">
                 <div className="flex items-center gap-2 text-gray-600">
                   <IconClock className="w-5 h-5" />
                   <span>{show.duration} mins</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <IconCalendar className="w-5 h-5" />
-                  <span>{releaseDate ? format(releaseDate, 'MMMM d, yyyy') : 'Date not available'}</span>
+                  <span>{formatReleaseDate(show.releaseDate)}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <IconTicket className="w-5 h-5" />
-                  <span>Genre: {show.genre}</span>
+                  <span>From ₹199</span>
                 </div>
-
-                <div className="mt-8">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button className="w-full" onClick={handleBookingClick}>Book Tickets</Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-3xl">
-                      <DialogHeader>
-                        <DialogTitle>Book Tickets for {show.title}</DialogTitle>
-                      </DialogHeader>
-                      {show.Screen?.Auditorium?.id && (
-                        <BookingStepper auditoriumId={show.Screen.Auditorium.id} />
-                      )}
-                    </DialogContent>
-                  </Dialog>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                    {formatGenre(show.genre)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <span className="font-medium">Organizer:</span>
+                  <span>{show.organizer}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Booking Section */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-xl font-semibold mb-6">Select Date & Time</h2>
+          
+          {/* Date Selection */}
+          <div className="mb-8">
+            <h3 className="text-lg font-medium mb-4">Select Date</h3>
+            <div className="flex gap-4 overflow-x-auto pb-4">
+              {availableDates.map((date) => (
+                <button
+                  key={date}
+                  onClick={() => setSelectedDate(date)}
+                  className={`flex flex-col items-center p-4 rounded-lg min-w-[100px] ${
+                    selectedDate === date
+                      ? 'bg-primary text-white'
+                      : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
+                >
+                  <span className="text-sm">{format(new Date(date), 'EEE')}</span>
+                  <span className="text-lg font-medium">{format(new Date(date), 'd')}</span>
+                  <span className="text-sm">{format(new Date(date), 'MMM')}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Showtime Selection */}
+          {selectedDate && (
+            <div>
+              <h3 className="text-lg font-medium mb-4">Select Time</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {dateShowtimes.map((showtime) => (
+                  <button
+                    key={showtime.id}
+                    onClick={() => handleShowtimeSelect(showtime.id)}
+                    className="p-4 rounded-lg text-center bg-gray-100 hover:bg-gray-200"
+                  >
+                    <div className="text-lg font-medium">
+                      {format(new Date(showtime.startTime), 'h:mm a')}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {showtime.Screen.name}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      ₹{showtime.Screen.price}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
-} 
+}
