@@ -66,31 +66,29 @@ export const CreateShow = () => {
   const onSubmit = async (data: z.infer<typeof schemaCreateShows>) => {
     try {
       console.log('Form data before submission:', data)
-      
+
       // Submit the form
       const result = await mutateAsync(data)
 
       console.log('Show created:', result)
       toast({
         title: 'Success',
-        description: 'Show created successfully'
+        description: 'Show created successfully',
       })
       router.push('/admin/shows')
     } catch (error) {
       console.error('Error submitting form:', error)
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to create show',
-        variant: 'destructive'
+        description:
+          error instanceof Error ? error.message : 'Failed to create show',
+        variant: 'destructive',
       })
     }
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4"
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <Label title="Title" error={errors.title?.message}>
         <Input placeholder="Enter Show Title" {...register('title')} />
       </Label>
@@ -165,9 +163,14 @@ export const CreateShow = () => {
           <input
             type="text"
             placeholder="Paste image URL or upload"
-            {...register('posterUrl', { pattern: { value: /^data:image\/.+;base64,|https?:\/\//, message: 'Enter a valid image URL or upload a file.' } })}
+            {...register('posterUrl', {
+              pattern: {
+                value: /^data:image\/.+;base64,|https?:\/\//,
+                message: 'Enter a valid image URL or upload a file.',
+              },
+            })}
             className="input input-bordered w-full"
-            onChange={e => {
+            onChange={(e) => {
               setPreviewUrl(e.target.value)
               setValue('posterUrl', e.target.value)
             }}
@@ -189,17 +192,29 @@ export const CreateShow = () => {
             Upload
           </button>
           {previewUrl && (
-            <button type="button" className="btn btn-ghost" onClick={handleRemoveImage}>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={handleRemoveImage}
+            >
               <IconX className="w-5 h-5" />
             </button>
           )}
         </div>
         {previewUrl && (
           <div className="mt-2">
-            <img src={previewUrl} alt="Poster Preview" className="max-h-48 rounded shadow" />
+            <img
+              src={previewUrl}
+              alt="Poster Preview"
+              className="max-h-48 rounded shadow"
+            />
           </div>
         )}
-        {errors.posterUrl && <p className="text-red-500 text-sm mt-1">{errors.posterUrl.message}</p>}
+        {errors.posterUrl && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.posterUrl.message}
+          </p>
+        )}
       </div>
 
       <Button loading={isLoading} type="submit">

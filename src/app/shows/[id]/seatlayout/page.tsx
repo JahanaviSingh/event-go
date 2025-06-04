@@ -8,8 +8,18 @@ import { Button } from '@/components/atoms/button'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
-import { IconArmchair, IconX, IconCreditCard, IconReceipt } from '@tabler/icons-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  IconArmchair,
+  IconX,
+  IconCreditCard,
+  IconReceipt,
+} from '@tabler/icons-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@clerk/nextjs'
@@ -47,11 +57,22 @@ const getRandomComment = (section: keyof typeof seatComments) => {
 }
 
 // Get seat section based on position
-const getSeatSection = (row: number, column: number, totalRows: number, totalColumns: number) => {
+const getSeatSection = (
+  row: number,
+  column: number,
+  totalRows: number,
+  totalColumns: number,
+) => {
   if (row === 1) return 'firstRow'
   if (row === totalRows) return 'lastRow'
   if (row === Math.floor(totalRows / 2)) return 'middle'
-  if (column === 1 || column === totalColumns || column === 2 || column === totalColumns - 1) return 'corner'
+  if (
+    column === 1 ||
+    column === totalColumns ||
+    column === 2 ||
+    column === totalColumns - 1
+  )
+    return 'corner'
   return 'default'
 }
 
@@ -65,12 +86,16 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const [isBooking, setIsBooking] = useState(false)
-  const [selectedSection, setSelectedSection] = useState<keyof typeof seatComments | null>(null)
+  const [selectedSection, setSelectedSection] = useState<
+    keyof typeof seatComments | null
+  >(null)
   const [showBookingDialog, setShowBookingDialog] = useState(false)
   const { isSignedIn } = useAuth()
   const { isLoading } = useAppSelector((state) => state.shows)
 
-  const selectedShowtimeId = useAppSelector((state) => state.shows.selectedShowtimeId)
+  const selectedShowtimeId = useAppSelector(
+    (state) => state.shows.selectedShowtimeId,
+  )
   const selectedSeats = useAppSelector((state) => state.shows.selectedSeats)
 
   useEffect(() => {
@@ -79,23 +104,24 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
     }
   }, [selectedShowtimeId, router])
 
-  const { data: showtimeData, isLoading: showtimeDataLoading } = trpcClient.showtimes.seats.useQuery(
-    { showtimeId: selectedShowtimeId ?? 0 },
-    {
-      enabled: !!selectedShowtimeId,
-    }
-  )
+  const { data: showtimeData, isLoading: showtimeDataLoading } =
+    trpcClient.showtimes.seats.useQuery(
+      { showtimeId: selectedShowtimeId ?? 0 },
+      {
+        enabled: !!selectedShowtimeId,
+      },
+    )
 
   const { data: showtimeInfo } = trpcClient.showtimes.showtimes.useQuery(
     {
       where: {
-        id: selectedShowtimeId ?? 0
-      }
+        id: selectedShowtimeId ?? 0,
+      },
     },
     {
       enabled: !!selectedShowtimeId,
-      select: (data) => data[0]
-    }
+      select: (data) => data[0],
+    },
   )
 
   if (showtimeDataLoading || !showtimeData || !showtimeInfo) {
@@ -104,7 +130,7 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
 
   const handleSeatClick = (row: number, column: number) => {
     const seat = showtimeData.seats.find(
-      (s) => s.row === row && s.column === column
+      (s) => s.row === row && s.column === column,
     )
     if (!seat) return
 
@@ -114,7 +140,7 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
     }
 
     const isSelected = selectedSeats.some(
-      (s) => s.row === row && s.column === column
+      (s) => s.row === row && s.column === column,
     )
 
     if (isSelected) {
@@ -124,7 +150,12 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
     }
 
     // Update selected section and show comment
-    const section = getSeatSection(row, column, Math.max(...showtimeData.seats.map(s => s.row)), Math.max(...showtimeData.seats.map(s => s.column)))
+    const section = getSeatSection(
+      row,
+      column,
+      Math.max(...showtimeData.seats.map((s) => s.row)),
+      Math.max(...showtimeData.seats.map((s) => s.column)),
+    )
     setSelectedSection(section)
     if (section !== 'default') {
       toast.info(getRandomComment(section))
@@ -148,7 +179,10 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
 
   const handleBooking = async () => {
     if (!selectedShowtimeId || !showtimeData) {
-      console.error('Missing required data:', { selectedShowtimeId, showtimeData })
+      console.error('Missing required data:', {
+        selectedShowtimeId,
+        showtimeData,
+      })
       return
     }
 
@@ -162,7 +196,7 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
         },
         body: JSON.stringify({
           showtimeId: selectedShowtimeId,
-          seats: selectedSeats.map(seat => ({
+          seats: selectedSeats.map((seat) => ({
             row: seat.row,
             column: seat.column,
           })),
@@ -178,11 +212,15 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
       if (!verifyData.available) {
         // Refresh the seat data and show which seats are no longer available
         const unavailableSeats = verifyData.unavailableSeats || []
-        const seatLabels = unavailableSeats.map(seat => 
-          `${String.fromCharCode(65 + seat.row - 1)}${seat.column}`
-        ).join(', ')
-        
-        toast.error(`Seats ${seatLabels} are no longer available. Please select different seats.`)
+        const seatLabels = unavailableSeats
+          .map(
+            (seat) => `${String.fromCharCode(65 + seat.row - 1)}${seat.column}`,
+          )
+          .join(', ')
+
+        toast.error(
+          `Seats ${seatLabels} are no longer available. Please select different seats.`,
+        )
         // Refresh the page to show updated seat availability
         window.location.reload()
         return
@@ -193,24 +231,27 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
         showTitle: showtimeInfo?.Show.title,
         showtime: showtimeInfo?.startTime,
         screenNumber: showtimeInfo?.Screen.number,
-        seats: selectedSeats.map(seat => 
-          `${String.fromCharCode(65 + seat.row - 1)}${seat.column}`
+        seats: selectedSeats.map(
+          (seat) => `${String.fromCharCode(65 + seat.row - 1)}${seat.column}`,
         ),
-        totalAmount: totalAmount + Math.round(totalAmount * 0.05) + Math.round(totalAmount * 0.18),
+        totalAmount:
+          totalAmount +
+          Math.round(totalAmount * 0.05) +
+          Math.round(totalAmount * 0.18),
         showtimeId: selectedShowtimeId,
         screenId: showtimeData.seats[0].screenId,
         auditorium: {
           name: showtimeInfo?.Screen.Auditorium.name,
           address: showtimeInfo?.Screen.Auditorium.Address?.address,
-          screenNumber: showtimeInfo?.Screen.number
-        }
+          screenNumber: showtimeInfo?.Screen.number,
+        },
       }
-      
+
       console.log('Saving booking data:', bookingData)
-      
+
       // Ensure booking data is saved before proceeding
       localStorage.setItem('currentBooking', JSON.stringify(bookingData))
-      
+
       // Verify the data was saved
       const savedData = localStorage.getItem('currentBooking')
       if (!savedData) {
@@ -219,7 +260,7 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
 
       console.log('Preparing to mark seats as booked:', {
         showtimeId: selectedShowtimeId,
-        seats: selectedSeats
+        seats: selectedSeats,
       })
 
       // Mark seats as booked in the database
@@ -230,7 +271,7 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
         },
         body: JSON.stringify({
           showtimeId: selectedShowtimeId,
-          seats: selectedSeats.map(seat => ({
+          seats: selectedSeats.map((seat) => ({
             row: seat.row,
             column: seat.column,
           })),
@@ -256,7 +297,9 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
       }, 100)
     } catch (error) {
       console.error('Booking failed:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to complete booking')
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to complete booking',
+      )
       // Clear any partial booking data
       localStorage.removeItem('currentBooking')
     } finally {
@@ -266,13 +309,16 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
   }
 
   // Group seats by row
-  const seatsByRow = showtimeData.seats.reduce((acc, seat) => {
-    if (!acc[seat.row]) {
-      acc[seat.row] = []
-    }
-    acc[seat.row].push(seat)
-    return acc
-  }, {} as Record<number, typeof showtimeData.seats>)
+  const seatsByRow = showtimeData.seats.reduce(
+    (acc, seat) => {
+      if (!acc[seat.row]) {
+        acc[seat.row] = []
+      }
+      acc[seat.row].push(seat)
+      return acc
+    },
+    {} as Record<number, typeof showtimeData.seats>,
+  )
 
   const totalAmount = selectedSeats.length * (showtimeData.price ?? 0)
 
@@ -283,7 +329,9 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold">{showtimeInfo.Show.title}</h1>
+              <h1 className="text-xl font-semibold">
+                {showtimeInfo.Show.title}
+              </h1>
               <p className="text-sm text-gray-600">
                 {format(new Date(showtimeInfo.startTime), 'PPp')}
               </p>
@@ -312,13 +360,13 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
                   <div className="flex gap-2">
                     {seats.map((seat) => {
                       const isSelected = selectedSeats.some(
-                        (s) => s.row === seat.row && s.column === seat.column
+                        (s) => s.row === seat.row && s.column === seat.column,
                       )
                       const section = getSeatSection(
                         seat.row,
                         seat.column,
-                        Math.max(...showtimeData.seats.map(s => s.row)),
-                        Math.max(...showtimeData.seats.map(s => s.column))
+                        Math.max(...showtimeData.seats.map((s) => s.row)),
+                        Math.max(...showtimeData.seats.map((s) => s.column)),
                       )
                       return (
                         <button
@@ -330,13 +378,13 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
                             seat.booked
                               ? 'bg-gray-300 cursor-not-allowed'
                               : isSelected
-                              ? 'bg-primary text-white'
-                              : 'bg-gray-100 hover:bg-gray-200',
+                                ? 'bg-primary text-white'
+                                : 'bg-gray-100 hover:bg-gray-200',
                             section !== 'default' && 'ring-2 ring-offset-2',
                             section === 'firstRow' && 'ring-yellow-400',
                             section === 'lastRow' && 'ring-blue-400',
                             section === 'middle' && 'ring-green-400',
-                            section === 'corner' && 'ring-purple-400'
+                            section === 'corner' && 'ring-purple-400',
                           )}
                         >
                           {seat.column}
@@ -393,9 +441,12 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
               <div className="flex justify-between">
                 <span className="text-gray-600">Selected Seats</span>
                 <span>
-                  {selectedSeats.map(seat => 
-                    `${String.fromCharCode(65 + seat.row - 1)}${seat.column}`
-                  ).join(', ')}
+                  {selectedSeats
+                    .map(
+                      (seat) =>
+                        `${String.fromCharCode(65 + seat.row - 1)}${seat.column}`,
+                    )
+                    .join(', ')}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -427,21 +478,29 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
           <div className="space-y-4 py-4">
             {/* Movie Details */}
             <div className="space-y-2">
-              <h3 className="font-semibold text-lg">{showtimeInfo?.Show.title}</h3>
+              <h3 className="font-semibold text-lg">
+                {showtimeInfo?.Show.title}
+              </h3>
               <div className="text-sm text-gray-600 space-y-1">
                 <p>{format(new Date(showtimeInfo?.startTime ?? ''), 'PPp')}</p>
                 <p>Screen {showtimeInfo?.Screen.number}</p>
               </div>
             </div>
             <Separator />
-            
+
             {/* Seat Details */}
             <div className="space-y-2">
               <h4 className="font-medium">Selected Seats</h4>
               <div className="bg-gray-50 p-3 rounded-md">
-                {selectedSeats.map(seat => (
-                  <div key={`${seat.row}-${seat.column}`} className="flex justify-between text-sm">
-                    <span>Seat {String.fromCharCode(65 + seat.row - 1)}{seat.column}</span>
+                {selectedSeats.map((seat) => (
+                  <div
+                    key={`${seat.row}-${seat.column}`}
+                    className="flex justify-between text-sm"
+                  >
+                    <span>
+                      Seat {String.fromCharCode(65 + seat.row - 1)}
+                      {seat.column}
+                    </span>
                     <span>₹{showtimeData.price}</span>
                   </div>
                 ))}
@@ -468,7 +527,12 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
                 <Separator />
                 <div className="flex justify-between font-semibold text-base">
                   <span>Total Amount</span>
-                  <span>₹{totalAmount + Math.round(totalAmount * 0.05) + Math.round(totalAmount * 0.18)}</span>
+                  <span>
+                    ₹
+                    {totalAmount +
+                      Math.round(totalAmount * 0.05) +
+                      Math.round(totalAmount * 0.18)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -495,4 +559,4 @@ export default function SeatLayoutPage({ params }: { params: { id: string } }) {
       </Dialog>
     </div>
   )
-} 
+}

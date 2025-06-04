@@ -7,11 +7,15 @@ import { Show, Showtime, Screen, Auditorium, Address } from '@prisma/client'
 
 type ShowWithRelations = Show & {
   Showtimes: (Showtime & {
-    Screen: (Screen & {
-      Auditorium: (Auditorium & {
-        Address: Address | null
-      }) | null
-    }) | null
+    Screen:
+      | (Screen & {
+          Auditorium:
+            | (Auditorium & {
+                Address: Address | null
+              })
+            | null
+        })
+      | null
   })[]
 }
 
@@ -23,16 +27,20 @@ type ShowsResponse = {
 
 export const showsRouter = createTRPCRouter({
   shows: publicProcedure
-    .input(z.object({
-      lat: z.number().optional(),
-      lng: z.number().optional(),
-      city: z.string().optional(),
-      id: z.number().optional(),
-    }).optional())
+    .input(
+      z
+        .object({
+          lat: z.number().optional(),
+          lng: z.number().optional(),
+          city: z.string().optional(),
+          id: z.number().optional(),
+        })
+        .optional(),
+    )
     .query(async ({ ctx, input }): Promise<ShowsResponse> => {
       console.log('=== Shows Query Debug ===')
       console.log('Input:', input)
-      
+
       // If ID is provided, get specific show
       if (input?.id) {
         const show = await ctx.db.show.findUnique({
@@ -44,34 +52,34 @@ export const showsRouter = createTRPCRouter({
                   include: {
                     Auditorium: {
                       include: {
-                        Address: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+                        Address: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         })
         return {
           matchingShows: show ? [show] : [],
           allShows: show ? [show] : [],
-          hasNearbyShows: true
+          hasNearbyShows: true,
         }
       }
 
       // First get all shows that have showtimes
-      const allShows = await ctx.db.show.findMany({
+      const allShows = (await ctx.db.show.findMany({
         where: {
           Showtimes: {
             some: {
               Screen: {
                 Auditorium: {
-                  isNot: undefined
-                }
-              }
-            }
-          }
+                  isNot: undefined,
+                },
+              },
+            },
+          },
         },
         include: {
           Showtimes: {
@@ -80,21 +88,21 @@ export const showsRouter = createTRPCRouter({
                 include: {
                   Auditorium: {
                     include: {
-                      Address: true
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }) as ShowWithRelations[]
+                      Address: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })) as ShowWithRelations[]
 
       console.log('=== All Shows Found ===')
       console.log('Total shows:', allShows.length)
-      allShows.forEach(show => {
+      allShows.forEach((show) => {
         console.log(`\nShow: ${show.title}`)
-        show.Showtimes.forEach(st => {
+        show.Showtimes.forEach((st) => {
           const auditorium = st.Screen?.Auditorium
           const address = auditorium?.Address
           console.log(`- Showtime: ${st.id}`)
@@ -111,19 +119,22 @@ export const showsRouter = createTRPCRouter({
         return {
           matchingShows: allShows,
           allShows: allShows,
-          hasNearbyShows: true
+          hasNearbyShows: true,
         }
       }
 
       // Filter shows based on input
       console.log('\n=== Filtering Shows ===')
-      console.log('Filtering with coordinates:', { lat: input?.lat, lng: input?.lng })
+      console.log('Filtering with coordinates:', {
+        lat: input?.lat,
+        lng: input?.lng,
+      })
       console.log('Filtering with city:', input?.city)
-      
-      const matchingShows = allShows.filter(show => {
+
+      const matchingShows = allShows.filter((show) => {
         console.log(`\nChecking show: ${show.title}`)
         // Check if any showtime matches the filters
-        const hasMatchingShowtime = show.Showtimes.some(showtime => {
+        const hasMatchingShowtime = show.Showtimes.some((showtime) => {
           if (!showtime.Screen?.Auditorium) {
             console.log(`- Showtime ${showtime.id} has no Screen or Auditorium`)
             return false
@@ -143,13 +154,15 @@ export const showsRouter = createTRPCRouter({
           // Filter by coordinates (within ~10km radius)
           if (input?.lat && input?.lng) {
             const distance = Math.sqrt(
-              Math.pow(address.lat - input.lat, 2) + 
-              Math.pow(address.lng - input.lng, 2)
+              Math.pow(address.lat - input.lat, 2) +
+                Math.pow(address.lng - input.lng, 2),
             )
             const isWithinRadius = distance <= 1 // ~100km radius
             console.log(`- Distance check for ${auditorium.name}:`)
             console.log(`  Search coordinates: ${input.lat}, ${input.lng}`)
-            console.log(`  Auditorium coordinates: ${address.lat}, ${address.lng}`)
+            console.log(
+              `  Auditorium coordinates: ${address.lat}, ${address.lng}`,
+            )
             console.log(`  Distance: ${distance}`)
             console.log(`  Within radius: ${isWithinRadius}`)
             if (!isWithinRadius) {
@@ -187,9 +200,9 @@ export const showsRouter = createTRPCRouter({
 
       console.log('\n=== Filtered Results ===')
       console.log('Matching shows count:', matchingShows.length)
-      matchingShows.forEach(show => {
+      matchingShows.forEach((show) => {
         console.log(`\nShow: ${show.title}`)
-        show.Showtimes.forEach(st => {
+        show.Showtimes.forEach((st) => {
           const auditorium = st.Screen?.Auditorium
           const address = auditorium?.Address
           console.log(`- Showtime: ${st.id}`)
@@ -203,7 +216,7 @@ export const showsRouter = createTRPCRouter({
       return {
         matchingShows: matchingShows,
         allShows: allShows,
-        hasNearbyShows: matchingShows.length > 0
+        hasNearbyShows: matchingShows.length > 0,
       }
     }),
   createShow: protectedProcedure('admin')

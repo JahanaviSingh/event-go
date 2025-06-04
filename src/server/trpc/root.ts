@@ -5,4 +5,4 @@ export const appRouter = createTRPCRouter({
   geocoding: geocodingRouter,
 })
 
-export type AppRouter = typeof appRouter 
+export type AppRouter = typeof appRouter

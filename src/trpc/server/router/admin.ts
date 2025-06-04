@@ -8,11 +8,11 @@ export const adminRouter = createTRPCRouter({
       z.object({
         startDate: z.string().optional(),
         endDate: z.string().optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const { startDate, endDate } = input
-      
+
       const bookings = await ctx.db.booking.findMany({
         where: {
           createdAt: {
@@ -33,17 +33,20 @@ export const adminRouter = createTRPCRouter({
       })
 
       // Group bookings by date and calculate revenue
-      const revenueByDate = bookings.reduce((acc, booking) => {
-        const date = booking.createdAt.toISOString().split('T')[0]
-        const revenue = booking.Showtime.Screen.price
-        
-        if (!acc[date]) {
-          acc[date] = 0
-        }
-        acc[date] += revenue
-        
-        return acc
-      }, {} as Record<string, number>)
+      const revenueByDate = bookings.reduce(
+        (acc, booking) => {
+          const date = booking.createdAt.toISOString().split('T')[0]
+          const revenue = booking.Showtime.Screen.price
+
+          if (!acc[date]) {
+            acc[date] = 0
+          }
+          acc[date] += revenue
+
+          return acc
+        },
+        {} as Record<string, number>,
+      )
 
       return Object.entries(revenueByDate).map(([date, revenue]) => ({
         date,
@@ -55,7 +58,7 @@ export const adminRouter = createTRPCRouter({
     .input(
       z.object({
         limit: z.number().min(1).max(50).default(10),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const bookings = await ctx.db.booking.findMany({
@@ -96,23 +99,23 @@ export const adminRouter = createTRPCRouter({
       },
     })
 
-    return auditoriums.map(auditorium => ({
+    return auditoriums.map((auditorium) => ({
       id: auditorium.id,
       name: auditorium.name,
       totalScreens: auditorium.Screens.length,
       totalShowtimes: auditorium.Screens.reduce(
         (acc, screen) => acc + screen.Showtimes.length,
-        0
+        0,
       ),
       totalBookings: auditorium.Screens.reduce(
         (acc, screen) =>
           acc +
           screen.Showtimes.reduce(
             (showtimeAcc, showtime) => showtimeAcc + showtime.Bookings.length,
-            0
+            0,
           ),
-        0
+        0,
       ),
     }))
   }),
-}) 
+})

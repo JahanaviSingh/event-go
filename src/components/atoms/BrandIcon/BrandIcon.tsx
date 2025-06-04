@@ -22,6 +22,5 @@ export const BrandIcon = ({
         style={{ transform: 'rotateX(22deg' }}
       />
     </div>
-   
   )
 }

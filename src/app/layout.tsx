@@ -36,7 +36,7 @@ export default function RootLayout({
           url: '/api/trpc',
         }),
       ],
-    })
+    }),
   )
 
   return (

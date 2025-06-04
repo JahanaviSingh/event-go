@@ -12,4 +12,4 @@ export interface StripeItemType {
     column: number
     price: number
   }>
-} 
+}

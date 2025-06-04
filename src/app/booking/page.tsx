@@ -20,4 +20,4 @@ export default function Booking() {
   }
 
   return <BookingPage />
-} 
+}

@@ -9,9 +9,10 @@ export default function EditAuditoriumPage() {
   const params = useParams()
   const auditoriumId = Number(params.id)
 
-  const { data: auditorium, isLoading } = trpcClient.auditoriums.getAuditoriumById.useQuery({
-    auditoriumId
-  })
+  const { data: auditorium, isLoading } =
+    trpcClient.auditoriums.getAuditoriumById.useQuery({
+      auditoriumId,
+    })
 
   if (isLoading) {
     return (
@@ -30,29 +31,34 @@ export default function EditAuditoriumPage() {
   }
 
   // Calculate rows and columns for each screen
-  const screens = auditorium.Screens?.map(screen => {
-    const rows = Math.ceil(screen.Seats.length / screen.columns)
-    return {
-      projectionType: screen.projectionType,
-      soundSystemType: screen.soundSystemType,
-      screenType: screen.screenType,
-      rows,
-      columns: screen.columns
-    }
-  }) || []
+  const screens =
+    auditorium.Screens?.map((screen) => {
+      const rows = Math.ceil(screen.Seats.length / screen.columns)
+      return {
+        projectionType: screen.projectionType,
+        soundSystemType: screen.soundSystemType,
+        screenType: screen.screenType,
+        rows,
+        columns: screen.columns,
+      }
+    }) || []
 
   return (
-    <FormProviderCreateAuditorium defaultValues={{
-      auditoriumName: auditorium.name,
-      managerId: auditorium.Managers?.[0]?.id || '',
-      address: auditorium.Address ? {
-        lat: auditorium.Address.lat,
-        lng: auditorium.Address.lng,
-        address: auditorium.Address.address
-      } : undefined,
-      screens
-    }}>
+    <FormProviderCreateAuditorium
+      defaultValues={{
+        auditoriumName: auditorium.name,
+        managerId: auditorium.Managers?.[0]?.id || '',
+        address: auditorium.Address
+          ? {
+              lat: auditorium.Address.lat,
+              lng: auditorium.Address.lng,
+              address: auditorium.Address.address,
+            }
+          : undefined,
+        screens,
+      }}
+    >
       <CreateAuditorium mode="edit" auditoriumId={auditoriumId} />
     </FormProviderCreateAuditorium>
   )
-} 
+}

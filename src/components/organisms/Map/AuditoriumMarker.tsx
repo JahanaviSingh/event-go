@@ -8,7 +8,12 @@ interface AuditoriumMarkerProps {
   onClick?: () => void
 }
 
-export const AuditoriumMarker = ({ longitude, latitude, name, onClick }: AuditoriumMarkerProps) => {
+export const AuditoriumMarker = ({
+  longitude,
+  latitude,
+  name,
+  onClick,
+}: AuditoriumMarkerProps) => {
   return (
     <Marker longitude={longitude} latitude={latitude} onClick={onClick}>
       <div className="relative group">
@@ -19,4 +24,4 @@ export const AuditoriumMarker = ({ longitude, latitude, name, onClick }: Auditor
       </div>
     </Marker>
   )
-} 
+}

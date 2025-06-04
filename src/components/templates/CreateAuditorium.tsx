@@ -31,7 +31,7 @@ const PROJECTION_TYPES = [
   'LASER_PROJECTOR',
   'LED_PROJECTOR',
   'SHORT_THROW_PROJECTOR',
-  'PANORAMIC_360_DEGREE_PROJECTION'
+  'PANORAMIC_360_DEGREE_PROJECTION',
 ] as const
 
 const SOUND_SYSTEM_TYPES = [
@@ -45,14 +45,14 @@ const SOUND_SYSTEM_TYPES = [
   'WIRELESS_MICROPHONE_SYSTEM',
   'DIGITAL_SIGNAL_PROCESSING_SYSTEM',
   'BI_AMP_SYSTEM',
-  'TRI_AMP_SYSTEM'
+  'TRI_AMP_SYSTEM',
 ] as const
 
 const SCREEN_TYPES = ['STRAIGHT', 'CURVED'] as const
 
-type ProjectionType = typeof PROJECTION_TYPES[number]
-type SoundSystemType = typeof SOUND_SYSTEM_TYPES[number]
-type ScreenType = typeof SCREEN_TYPES[number]
+type ProjectionType = (typeof PROJECTION_TYPES)[number]
+type SoundSystemType = (typeof SOUND_SYSTEM_TYPES)[number]
+type ScreenType = (typeof SCREEN_TYPES)[number]
 
 // Extend the ViewState type to include formattedAddress
 interface ExtendedViewState extends ViewState {
@@ -64,7 +64,10 @@ interface CreateAuditoriumProps {
   auditoriumId?: number
 }
 
-export const CreateAuditorium = ({ mode = 'create', auditoriumId }: CreateAuditoriumProps) => {
+export const CreateAuditorium = ({
+  mode = 'create',
+  auditoriumId,
+}: CreateAuditoriumProps) => {
   const {
     register,
     handleSubmit,
@@ -91,15 +94,23 @@ export const CreateAuditorium = ({ mode = 'create', auditoriumId }: CreateAudito
   const handleLocationChange = (location: ExtendedViewState) => {
     try {
       // Validate coordinates
-      if (!location.latitude || !location.longitude || 
-          isNaN(location.latitude) || isNaN(location.longitude)) {
+      if (
+        !location.latitude ||
+        !location.longitude ||
+        isNaN(location.latitude) ||
+        isNaN(location.longitude)
+      ) {
         console.error('Invalid coordinates received:', location)
         return
       }
 
       // Ensure coordinates are within valid ranges
-      if (location.latitude < -90 || location.latitude > 90 || 
-          location.longitude < -180 || location.longitude > 180) {
+      if (
+        location.latitude < -90 ||
+        location.latitude > 90 ||
+        location.longitude < -180 ||
+        location.longitude > 180
+      ) {
         console.error('Coordinates out of valid range:', location)
         return
       }
@@ -108,7 +119,7 @@ export const CreateAuditorium = ({ mode = 'create', auditoriumId }: CreateAudito
       setValue('address.lng', location.longitude, { shouldValidate: true })
       const formattedAddress = location.formattedAddress || ''
       setValue('address.address', formattedAddress, { shouldValidate: true })
-      
+
       setViewState({
         ...location,
         zoom: 15,
@@ -127,29 +138,35 @@ export const CreateAuditorium = ({ mode = 'create', auditoriumId }: CreateAudito
         ne_lng: viewState.longitude + 0.1,
         sw_lat: viewState.latitude - 0.1,
         sw_lng: viewState.longitude - 0.1,
-      }
+      },
     },
     {
       enabled: true,
       onSuccess: (data) => {
         setNearbyAuditoriums(data)
-      }
-    }
+      },
+    },
   )
 
   const handleMapClick = (e: any) => {
     try {
       const { lng, lat } = e.lngLat
-      
+
       // Validate coordinates
       if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
-        console.error('Invalid coordinates received from map click:', { lat, lng })
+        console.error('Invalid coordinates received from map click:', {
+          lat,
+          lng,
+        })
         return
       }
 
       // Ensure coordinates are within valid ranges
       if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-        console.error('Coordinates out of valid range from map click:', { lat, lng })
+        console.error('Coordinates out of valid range from map click:', {
+          lat,
+          lng,
+        })
         return
       }
 
@@ -171,7 +188,7 @@ export const CreateAuditorium = ({ mode = 'create', auditoriumId }: CreateAudito
       if (mode === 'edit' && auditoriumId) {
         await updateAuditorium({
           id: auditoriumId,
-          ...data
+          ...data,
         })
         toast({
           title: 'Auditorium updated successfully',
@@ -188,8 +205,12 @@ export const CreateAuditorium = ({ mode = 'create', auditoriumId }: CreateAudito
       router.push('/admin/auditoriums')
     } catch (error) {
       toast({
-        title: mode === 'edit' ? 'Failed to update auditorium' : 'Failed to create auditorium',
-        description: error instanceof Error ? error.message : 'An error occurred',
+        title:
+          mode === 'edit'
+            ? 'Failed to update auditorium'
+            : 'Failed to create auditorium',
+        description:
+          error instanceof Error ? error.message : 'An error occurred',
         variant: 'destructive',
       })
     }
@@ -219,10 +240,7 @@ export const CreateAuditorium = ({ mode = 'create', auditoriumId }: CreateAudito
         <div>
           <Label>Address</Label>
           <div className="h-[400px] rounded-lg overflow-hidden">
-            <Map 
-              initialViewState={viewState}
-              onClick={handleMapClick}
-            >
+            <Map initialViewState={viewState} onClick={handleMapClick}>
               <Panel position="right-center">
                 <DefaultZoomControls />
               </Panel>
@@ -233,19 +251,21 @@ export const CreateAuditorium = ({ mode = 'create', auditoriumId }: CreateAudito
               {nearbyAuditoriums.map((auditorium) => (
                 <AuditoriumMarker key={auditorium.id} marker={auditorium} />
               ))}
-              {viewState.latitude && viewState.longitude && 
-               !isNaN(viewState.latitude) && !isNaN(viewState.longitude) && (
-                <Marker
-                  longitude={viewState.longitude}
-                  latitude={viewState.latitude}
-                  anchor="bottom"
-                >
-                  <div className="relative">
-                    <MapPin className="w-6 h-6 text-primary" />
-                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-primary rounded-full" />
-                  </div>
-                </Marker>
-              )}
+              {viewState.latitude &&
+                viewState.longitude &&
+                !isNaN(viewState.latitude) &&
+                !isNaN(viewState.longitude) && (
+                  <Marker
+                    longitude={viewState.longitude}
+                    latitude={viewState.latitude}
+                    anchor="bottom"
+                  >
+                    <div className="relative">
+                      <MapPin className="w-6 h-6 text-primary" />
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-primary rounded-full" />
+                    </div>
+                  </Marker>
+                )}
             </Map>
           </div>
           <div className="mt-2 space-y-2">
@@ -285,7 +305,10 @@ export const CreateAuditorium = ({ mode = 'create', auditoriumId }: CreateAudito
         >
           Cancel
         </Button>
-        <Button type="submit" loading={mode === 'edit' ? isUpdating : isCreating}>
+        <Button
+          type="submit"
+          loading={mode === 'edit' ? isUpdating : isCreating}
+        >
           {mode === 'edit' ? 'Update Auditorium' : 'Create Auditorium'}
         </Button>
       </div>
@@ -294,7 +317,11 @@ export const CreateAuditorium = ({ mode = 'create', auditoriumId }: CreateAudito
 }
 
 const AddScreens = () => {
-  const { control, register, formState: { errors } } = useFormContext<FormTypeCreateAuditorium>()
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = useFormContext<FormTypeCreateAuditorium>()
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'screens',
@@ -309,8 +336,8 @@ const AddScreens = () => {
       soundSystemType: 'STANDARD' as const,
       screenType: 'STRAIGHT' as const,
       rows: 0,
-      columns: 0
-    }))
+      columns: 0,
+    })),
   })
 
   return (
@@ -388,7 +415,9 @@ const AddScreens = () => {
               <Label>Columns</Label>
               <Input
                 type="number"
-                {...register(`screens.${index}.columns`, { valueAsNumber: true })}
+                {...register(`screens.${index}.columns`, {
+                  valueAsNumber: true,
+                })}
                 error={errors.screens?.[index]?.columns?.message}
               />
             </div>

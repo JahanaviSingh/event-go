@@ -6,10 +6,7 @@ export async function POST(request: Request) {
   try {
     const { userId } = getAuth(request)
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -18,7 +15,7 @@ export async function POST(request: Request) {
     if (!showtimeId || !seats || !Array.isArray(seats)) {
       return NextResponse.json(
         { error: 'Invalid request data' },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -26,36 +23,36 @@ export async function POST(request: Request) {
     const existingBookings = await prisma.booking.findMany({
       where: {
         showtimeId,
-        OR: seats.map(seat => ({
+        OR: seats.map((seat) => ({
           AND: {
             row: seat.row,
-            column: seat.column
-          }
-        }))
-      }
+            column: seat.column,
+          },
+        })),
+      },
     })
 
     if (existingBookings.length > 0) {
       // Return which specific seats are unavailable
-      const unavailableSeats = existingBookings.map(booking => ({
+      const unavailableSeats = existingBookings.map((booking) => ({
         row: booking.row,
-        column: booking.column
+        column: booking.column,
       }))
 
       return NextResponse.json({
         available: false,
-        unavailableSeats
+        unavailableSeats,
       })
     }
 
     return NextResponse.json({
-      available: true
+      available: true,
     })
   } catch (error) {
     console.error('Error verifying seats:', error)
     return NextResponse.json(
       { error: 'Failed to verify seats' },
-      { status: 500 }
+      { status: 500 },
     )
   }
-} 
+}

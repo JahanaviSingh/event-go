@@ -2,7 +2,12 @@ import { useState } from 'react'
 import { trpcClient } from '@/trpc/clients/client'
 import { Marker } from '@vis.gl/react-maplibre'
 import { IconSchool, IconBuildingEstate } from '@tabler/icons-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../atoms/Dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '../../atoms/Dialog'
 import { Input } from '../../atoms/input'
 import { Loader } from '../../molecules/Loader'
 
@@ -12,15 +17,16 @@ export const UniversityAuditoriums = () => {
   const [name, setName] = useState('')
   const [selectedUniversity, setSelectedUniversity] = useState<any>(null)
 
-  const { data: universities, isLoading } = trpcClient.geocoding.searchUniversities.useQuery(
-    { city, state, name },
-    {
-      enabled: true,
-      onError: (error) => {
-        console.error('Error fetching universities:', error)
+  const { data: universities, isLoading } =
+    trpcClient.geocoding.searchUniversities.useQuery(
+      { city, state, name },
+      {
+        enabled: true,
+        onError: (error) => {
+          console.error('Error fetching universities:', error)
+        },
       },
-    }
-  )
+    )
 
   if (isLoading) {
     return <Loader />
@@ -82,7 +88,10 @@ export const UniversityAuditoriums = () => {
       ))}
 
       {/* University Details Dialog */}
-      <Dialog open={!!selectedUniversity} onOpenChange={() => setSelectedUniversity(null)}>
+      <Dialog
+        open={!!selectedUniversity}
+        onOpenChange={() => setSelectedUniversity(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{selectedUniversity?.name}</DialogTitle>
@@ -90,7 +99,9 @@ export const UniversityAuditoriums = () => {
           <div className="space-y-4">
             <div>
               <h3 className="font-semibold">Address</h3>
-              <p className="text-sm text-gray-600">{selectedUniversity?.address}</p>
+              <p className="text-sm text-gray-600">
+                {selectedUniversity?.address}
+              </p>
             </div>
             <div>
               <h3 className="font-semibold">Location</h3>
@@ -114,14 +125,18 @@ export const UniversityAuditoriums = () => {
             <div>
               <h3 className="font-semibold">Nearby Auditoriums</h3>
               {selectedUniversity?.auditoriums.length === 0 ? (
-                <p className="text-sm text-gray-600">No auditoriums found nearby</p>
+                <p className="text-sm text-gray-600">
+                  No auditoriums found nearby
+                </p>
               ) : (
                 <ul className="space-y-2">
                   {selectedUniversity?.auditoriums.map((auditorium: any) => (
                     <li key={auditorium.id} className="text-sm">
                       <div className="font-medium">{auditorium.name}</div>
                       <div className="text-gray-600">{auditorium.address}</div>
-                      <div className="text-gray-500 text-xs">Type: {auditorium.type}</div>
+                      <div className="text-gray-500 text-xs">
+                        Type: {auditorium.type}
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -132,4 +147,4 @@ export const UniversityAuditoriums = () => {
       </Dialog>
     </div>
   )
-} 
+}

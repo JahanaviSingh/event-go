@@ -7,10 +7,7 @@ export async function GET(request: Request) {
     const { userId } = getAuth(request)
     if (!userId) {
       console.log('=== No userId found in request ===')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     console.log('=== Fetching tickets for userId:', userId, '===')
@@ -21,8 +18,8 @@ export async function GET(request: Request) {
         id: 23, // The latest ticket ID from your logs
       },
       include: {
-        Bookings: true
-      }
+        Bookings: true,
+      },
     })
 
     console.log('=== Specific ticket check ===')
@@ -32,14 +29,14 @@ export async function GET(request: Request) {
         id: specificTicket.id,
         uid: specificTicket.uid,
         bookingsCount: specificTicket.Bookings.length,
-        createdAt: specificTicket.createdAt
+        createdAt: specificTicket.createdAt,
       })
     }
 
     // Now fetch all tickets for the user
     const tickets = await prisma.ticket.findMany({
       where: {
-        uid: userId
+        uid: userId,
       },
       include: {
         Bookings: {
@@ -51,24 +48,27 @@ export async function GET(request: Request) {
                   include: {
                     Auditorium: {
                       include: {
-                        Address: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+                        Address: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     })
 
     console.log('=== Found tickets ===')
     console.log('Number of tickets:', tickets.length)
-    console.log('Ticket IDs:', tickets.map(t => t.id))
+    console.log(
+      'Ticket IDs:',
+      tickets.map((t) => t.id),
+    )
 
     if (tickets.length === 0) {
       console.log('No tickets found for user')
@@ -76,43 +76,47 @@ export async function GET(request: Request) {
     }
 
     // Transform the data to include all necessary information
-    const formattedTickets = tickets.map(ticket => {
-      console.log('=== Processing ticket:', ticket.id, '===')
-      const booking = ticket.Bookings[0] // Get the first booking (they should all be for the same showtime)
-      if (!booking) {
-        console.log('No booking found for ticket:', ticket.id)
-        return null
-      }
+    const formattedTickets = tickets
+      .map((ticket) => {
+        console.log('=== Processing ticket:', ticket.id, '===')
+        const booking = ticket.Bookings[0] // Get the first booking (they should all be for the same showtime)
+        if (!booking) {
+          console.log('No booking found for ticket:', ticket.id)
+          return null
+        }
 
-      const showtime = booking.Showtime
-      const show = showtime.Show
-      const screen = showtime.Screen
-      const auditorium = screen.Auditorium
+        const showtime = booking.Showtime
+        const show = showtime.Show
+        const screen = showtime.Screen
+        const auditorium = screen.Auditorium
 
-      if (!show || !screen || !auditorium) {
-        console.log('Missing required data for ticket:', ticket.id)
-        return null
-      }
+        if (!show || !screen || !auditorium) {
+          console.log('Missing required data for ticket:', ticket.id)
+          return null
+        }
 
-      const formattedTicket = {
-        ticketId: ticket.id,
-        qrCode: ticket.qrCode,
-        showTitle: show.title,
-        showtime: showtime.startTime,
-        screenNumber: screen.number,
-        seats: ticket.Bookings.map(b => `${String.fromCharCode(65 + b.row - 1)}${b.column}`),
-        totalAmount: ticket.Bookings.length * screen.price,
-        auditorium: {
-          name: auditorium.name,
-          address: auditorium.Address?.address,
-          screenNumber: screen.number
-        },
-        createdAt: ticket.createdAt
-      }
+        const formattedTicket = {
+          ticketId: ticket.id,
+          qrCode: ticket.qrCode,
+          showTitle: show.title,
+          showtime: showtime.startTime,
+          screenNumber: screen.number,
+          seats: ticket.Bookings.map(
+            (b) => `${String.fromCharCode(65 + b.row - 1)}${b.column}`,
+          ),
+          totalAmount: ticket.Bookings.length * screen.price,
+          auditorium: {
+            name: auditorium.name,
+            address: auditorium.Address?.address,
+            screenNumber: screen.number,
+          },
+          createdAt: ticket.createdAt,
+        }
 
-      console.log('Formatted ticket:', formattedTicket)
-      return formattedTicket
-    }).filter(Boolean) // Remove any null entries
+        console.log('Formatted ticket:', formattedTicket)
+        return formattedTicket
+      })
+      .filter(Boolean) // Remove any null entries
 
     console.log('=== Returning formatted tickets ===')
     console.log('Number of formatted tickets:', formattedTickets.length)
@@ -123,7 +127,7 @@ export async function GET(request: Request) {
     console.error('Error details:', error)
     return NextResponse.json(
       { error: 'Failed to fetch tickets' },
-      { status: 500 }
+      { status: 500 },
     )
   }
-} 
+}

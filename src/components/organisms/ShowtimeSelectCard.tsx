@@ -24,9 +24,9 @@ export const ShowtimeSelectCard = ({
   const handleClick = () => {
     if (!isSignedIn) {
       toast({
-        title: "Authentication Required",
-        description: "Please sign in to book tickets",
-        variant: "destructive"
+        title: 'Authentication Required',
+        description: 'Please sign in to book tickets',
+        variant: 'destructive',
       })
       router.push('/sign-in')
       return
@@ -50,12 +50,12 @@ export const ShowtimeSelectCard = ({
       <div className="text-xs ">{showtime.screen.projectionType}</div>
       <div className="text-xs ">{showtime.screen.soundSystemType}</div>
       <ShowRemainingSeats showtimeId={showtime.id} />
-      <Button 
+      <Button
         onClick={handleClick}
         className="w-full mt-2"
-        variant={selected ? "default" : "outline"}
+        variant={selected ? 'default' : 'outline'}
       >
-        {selected ? "Selected" : "Book Now"}
+        {selected ? 'Selected' : 'Book Now'}
       </Button>
     </div>
   )

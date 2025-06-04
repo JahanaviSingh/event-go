@@ -10,7 +10,13 @@ import { Manager, User } from '@prisma/client'
 import { useState } from 'react'
 import { Input } from '@/components/atoms/input'
 import { Label } from '@/components/atoms/label'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/atoms/Dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/atoms/Dialog'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -52,12 +58,19 @@ const columns: ColumnDef<ManagerWithUser>[] = [
 ]
 
 export default function ManageManagers() {
-  const { data: managers, isLoading } = trpcClient.managers.listManagers.useQuery()
-  const { mutateAsync: createManager } = trpcClient.managers.createManager.useMutation()
+  const { data: managers, isLoading } =
+    trpcClient.managers.listManagers.useQuery()
+  const { mutateAsync: createManager } =
+    trpcClient.managers.createManager.useMutation()
   const { toast } = useToast()
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateManagerForm>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateManagerForm>({
     resolver: zodResolver(createManagerSchema),
   })
 
@@ -99,14 +112,24 @@ export default function ManageManagers() {
                 <Input placeholder="Enter email" {...register('email')} />
               </Label>
               <Label title="Password" error={errors.password?.message}>
-                <Input type="password" placeholder="Enter password" {...register('password')} />
+                <Input
+                  type="password"
+                  placeholder="Enter password"
+                  {...register('password')}
+                />
               </Label>
-              <Button type="submit" className="w-full">Create Manager</Button>
+              <Button type="submit" className="w-full">
+                Create Manager
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
-      <DataTable columns={columns} data={managers || []} isLoading={isLoading} />
+      <DataTable
+        columns={columns}
+        data={managers || []}
+        isLoading={isLoading}
+      />
     </div>
   )
-} 
+}

@@ -11,9 +11,9 @@ export const bookingsRouter = createTRPCRouter({
           z.object({
             row: z.number(),
             column: z.number(),
-          })
+          }),
         ),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const { showtimeId, seats } = input
@@ -35,7 +35,7 @@ export const bookingsRouter = createTRPCRouter({
       const existingBookings = await ctx.db.booking.findMany({
         where: {
           showtimeId,
-          OR: seats.map(seat => ({
+          OR: seats.map((seat) => ({
             AND: {
               row: seat.row,
               column: seat.column,
@@ -53,7 +53,7 @@ export const bookingsRouter = createTRPCRouter({
 
       // Create bookings
       const bookings = await Promise.all(
-        seats.map(seat =>
+        seats.map((seat) =>
           ctx.db.booking.create({
             data: {
               showtimeId,
@@ -62,10 +62,10 @@ export const bookingsRouter = createTRPCRouter({
               column: seat.column,
               userId: ctx.session.user.id,
             },
-          })
-        )
+          }),
+        ),
       )
 
       return bookings
     }),
-}) 
+})

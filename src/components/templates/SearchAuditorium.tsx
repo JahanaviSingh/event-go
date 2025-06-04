@@ -1,5 +1,12 @@
 'use client'
-import { ReactNode, useEffect, useMemo, useState, useCallback, useRef } from 'react'
+import {
+  ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+} from 'react'
 import { Map } from '../organisms/Map/Map'
 import { Panel } from '../organisms/Map/Panel'
 import { DefaultZoomControls } from '../organisms/Map/ZoomControls'
@@ -7,7 +14,12 @@ import { Marker } from '@vis.gl/react-maplibre'
 import { useMap } from '@vis.gl/react-maplibre'
 import type { LngLatBounds } from 'mapbox-gl'
 import { BrandIcon } from '../atoms/BrandIcon/BrandIcon'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../atoms/Dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '../atoms/Dialog'
 import { useAppDispatch, useAppSelector } from '@/store'
 import type { RootState } from '@/store'
 import Link from 'next/link'
@@ -21,7 +33,14 @@ import { addCityId } from '@/store/cities/store'
 import { AuditoriumSelectCard } from '../organisms/AuditoriumSelectCard'
 import { ShowtimeSelectCard } from '../organisms/ShowtimeSelectCard'
 import { format, isSameDay, isToday, isTomorrow } from 'date-fns'
-import { IconArmchair, IconBox, IconMapPinFilled, IconBuildingEstate, IconMapPin, IconSchool } from '@tabler/icons-react'
+import {
+  IconArmchair,
+  IconBox,
+  IconMapPinFilled,
+  IconBuildingEstate,
+  IconMapPin,
+  IconSchool,
+} from '@tabler/icons-react'
 import { useKeypress } from '@/util/hooks/useKeypress'
 import { Loader, LoaderPanel } from '@/components/molecules/Loader'
 import { SelectSeats } from './SelectSeats'
@@ -65,41 +84,57 @@ export const SearchAuditorium = ({}: ISearchAuditoriumProps) => {
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   }
 
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [selectedAuditorium, setSelectedAuditorium] = useState<NearbyAuditorium | null>(null)
+  const [selectedLocation, setSelectedLocation] = useState<{
+    lat: number
+    lng: number
+  } | null>(null)
+  const [selectedAuditorium, setSelectedAuditorium] =
+    useState<NearbyAuditorium | null>(null)
   const router = useRouter()
 
-  const { data: nearbyAuditoriums, isLoading: isLoadingNearby } = trpcClient.geocoding.searchNearbyAuditoriums.useQuery(
-    selectedLocation ? { lat: selectedLocation.lat, lng: selectedLocation.lng, radius: 1000 } : undefined,
-    {
-      enabled: !!selectedLocation,
-      onError: (error) => {
-        console.error('Error fetching nearby auditoriums:', error)
-        notification$.error('Failed to fetch nearby auditoriums')
+  const { data: nearbyAuditoriums, isLoading: isLoadingNearby } =
+    trpcClient.geocoding.searchNearbyAuditoriums.useQuery(
+      selectedLocation
+        ? { lat: selectedLocation.lat, lng: selectedLocation.lng, radius: 1000 }
+        : undefined,
+      {
+        enabled: !!selectedLocation,
+        onError: (error) => {
+          console.error('Error fetching nearby auditoriums:', error)
+          notification$.error('Failed to fetch nearby auditoriums')
+        },
       },
-    }
-  )
+    )
 
-  const handleLocationSelect = useCallback(async (location: { lat: number; lng: number; formattedAddress: string }) => {
-    console.log('Selected location:', location)
-    setSelectedLocation({ lat: location.lat, lng: location.lng })
-    
-    try {
-      // Get city name from the formatted address
-      const addressParts = location.formattedAddress.split(',')
-      const cityName = addressParts[addressParts.length - 2]?.trim() || addressParts[0]?.trim()
-      
-      if (cityName) {
-        // Navigate to the city's auditoriums page
-        router.push(`/auditoriums/${encodeURIComponent(cityName)}`)
-      } else {
-        notification$.error('Could not determine city from selected location')
+  const handleLocationSelect = useCallback(
+    async (location: {
+      lat: number
+      lng: number
+      formattedAddress: string
+    }) => {
+      console.log('Selected location:', location)
+      setSelectedLocation({ lat: location.lat, lng: location.lng })
+
+      try {
+        // Get city name from the formatted address
+        const addressParts = location.formattedAddress.split(',')
+        const cityName =
+          addressParts[addressParts.length - 2]?.trim() ||
+          addressParts[0]?.trim()
+
+        if (cityName) {
+          // Navigate to the city's auditoriums page
+          router.push(`/auditoriums/${encodeURIComponent(cityName)}`)
+        } else {
+          notification$.error('Could not determine city from selected location')
+        }
+      } catch (error) {
+        console.error('Error processing location:', error)
+        notification$.error('Error processing selected location')
       }
-    } catch (error) {
-      console.error('Error processing location:', error)
-      notification$.error('Error processing selected location')
-    }
-  }, [router])
+    },
+    [router],
+  )
 
   return (
     <div className="relative w-full h-full">
@@ -112,9 +147,7 @@ export const SearchAuditorium = ({}: ISearchAuditoriumProps) => {
         <Panel position="left-top">
           <div className="flex flex-col gap-2">
             <div className="flex gap-2 bg-white/80 p-2 rounded-lg shadow-lg">
-              <button
-                className="p-2 rounded-lg flex items-center gap-2 bg-primary text-white"
-              >
+              <button className="p-2 rounded-lg flex items-center gap-2 bg-primary text-white">
                 <IconMapPin className="w-5 h-5" />
                 <span className="text-sm">Pick Location</span>
               </button>
@@ -141,7 +174,10 @@ export const SearchAuditorium = ({}: ISearchAuditoriumProps) => {
         ))}
 
         {/* Nearby Auditoriums Dialog */}
-        <Dialog open={!!selectedAuditorium} onOpenChange={() => setSelectedAuditorium(null)}>
+        <Dialog
+          open={!!selectedAuditorium}
+          onOpenChange={() => setSelectedAuditorium(null)}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{selectedAuditorium?.name}</DialogTitle>
@@ -149,11 +185,15 @@ export const SearchAuditorium = ({}: ISearchAuditoriumProps) => {
             <div className="space-y-4">
               <div>
                 <h3 className="font-semibold">Address</h3>
-                <p className="text-sm text-gray-600">{selectedAuditorium?.address}</p>
+                <p className="text-sm text-gray-600">
+                  {selectedAuditorium?.address}
+                </p>
               </div>
               <div>
                 <h3 className="font-semibold">Type</h3>
-                <p className="text-sm text-gray-600">{selectedAuditorium?.type}</p>
+                <p className="text-sm text-gray-600">
+                  {selectedAuditorium?.type}
+                </p>
               </div>
               {selectedAuditorium?.website && (
                 <div>
@@ -171,13 +211,17 @@ export const SearchAuditorium = ({}: ISearchAuditoriumProps) => {
               {selectedAuditorium?.phone && (
                 <div>
                   <h3 className="font-semibold">Phone</h3>
-                  <p className="text-sm text-gray-600">{selectedAuditorium.phone}</p>
+                  <p className="text-sm text-gray-600">
+                    {selectedAuditorium.phone}
+                  </p>
                 </div>
               )}
               {selectedAuditorium?.openingHours && (
                 <div>
                   <h3 className="font-semibold">Opening Hours</h3>
-                  <p className="text-sm text-gray-600">{selectedAuditorium.openingHours}</p>
+                  <p className="text-sm text-gray-600">
+                    {selectedAuditorium.openingHours}
+                  </p>
                 </div>
               )}
             </div>
@@ -185,7 +229,8 @@ export const SearchAuditorium = ({}: ISearchAuditoriumProps) => {
         </Dialog>
       </Map>
       <div className="absolute bottom-4 left-4 bg-white/80 px-3 py-1 rounded text-sm">
-        Press <kbd className="px-1 py-0.5 bg-gray-100 rounded border">P</kbd> to pick location
+        Press <kbd className="px-1 py-0.5 bg-gray-100 rounded border">P</kbd> to
+        pick location
       </div>
       {isLoadingNearby && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/80 px-4 py-2 rounded shadow-lg">
@@ -202,13 +247,13 @@ export const CityButton = ({ children }: { children: ReactNode }) => {
 }
 
 export const cities = [
-    {
-        id: 1,
-        name: 'नयी दिल्ली',
-        englishName: 'New Delhi',
-        lat: 28.6139,
-        lng: 77.209,
-      },
+  {
+    id: 1,
+    name: 'नयी दिल्ली',
+    englishName: 'New Delhi',
+    lat: 28.6139,
+    lng: 77.209,
+  },
   { id: 9, name: 'சென்னை', englishName: 'Chennai', lat: 13.0827, lng: 80.2707 },
   {
     id: 2,
@@ -234,12 +279,12 @@ export const cities = [
   { id: 5, name: 'मुंबई', englishName: 'Mumbai', lat: 19.076, lng: 72.8777 },
   { id: 6, name: 'पुणे', englishName: 'Pune', lat: 18.5204, lng: 73.8567 },
   { id: 7, name: 'কলকাতা', englishName: 'Kolkata', lat: 22.5726, lng: 88.3639 },
-  { 
-    id: 8, 
-    name: 'श्रीनगर गढ़वाल', 
-    englishName: 'Srinagar Garhwal', 
-    lat: 30.2227, 
-    lng: 78.7837 
+  {
+    id: 8,
+    name: 'श्रीनगर गढ़वाल',
+    englishName: 'Srinagar Garhwal',
+    lat: 30.2227,
+    lng: 78.7837,
   },
 ]
 
@@ -248,12 +293,14 @@ export const SetCity = () => {
   const [open, setOpen] = useState(() => !selectedCityId)
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(false)
-  const [searchResults, setSearchResults] = useState<Array<{
-    placeName: string
-    latLng: [number, number]
-    id: string
-    country: string
-  }>>([])
+  const [searchResults, setSearchResults] = useState<
+    Array<{
+      placeName: string
+      latLng: [number, number]
+      id: string
+      country: string
+    }>
+  >([])
   const dispatch = useAppDispatch()
   const searchInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
@@ -289,19 +336,21 @@ export const SetCity = () => {
         {
           headers: {
             'Accept-Language': 'en-US,en;q=0.9',
-            'User-Agent': 'EventGo/1.0'
-          }
-        }
+            'User-Agent': 'EventGo/1.0',
+          },
+        },
       )
         .then((response) => response.json())
         .then((data) => {
           const filtered = data
-            .filter((x: any) => x.type === 'city' || x.type === 'administrative')
+            .filter(
+              (x: any) => x.type === 'city' || x.type === 'administrative',
+            )
             .map((x: any) => ({
               placeName: x.display_name,
               latLng: [parseFloat(x.lat), parseFloat(x.lon)],
               id: `${x.place_id}-${x.osm_id}`,
-              country: x.address?.country || 'India'
+              country: x.address?.country || 'India',
             }))
 
           setSearchResults(filtered || [])
@@ -346,7 +395,9 @@ export const SetCity = () => {
                 onClick={() => {
                   setOpen(false)
                   // Trigger the location picker
-                  const locationButton = document.querySelector('button[aria-label="Pick Location"]') as HTMLButtonElement
+                  const locationButton = document.querySelector(
+                    'button[aria-label="Pick Location"]',
+                  ) as HTMLButtonElement
                   locationButton?.click()
                 }}
                 className="p-2 rounded-lg bg-primary text-white hover:bg-primary/90"
@@ -366,10 +417,16 @@ export const SetCity = () => {
                   <button
                     className="block w-full p-2 text-left hover:bg-gray-100"
                     key={place.id}
-                    onClick={() => handleCitySelect(place.placeName.split(',')[0])}
+                    onClick={() =>
+                      handleCitySelect(place.placeName.split(',')[0])
+                    }
                   >
-                    <div className="font-medium">{place.placeName.split(',')[0]}</div>
-                    <div className="text-xs text-gray-600">{place.placeName}</div>
+                    <div className="font-medium">
+                      {place.placeName.split(',')[0]}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      {place.placeName}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -385,7 +442,9 @@ export const SetCity = () => {
                   key={city.id}
                 >
                   <div className="text-lg">{city.name}</div>
-                  <div className="text-xs text-gray-600">{city.englishName}</div>
+                  <div className="text-xs text-gray-600">
+                    {city.englishName}
+                  </div>
                 </button>
               ))}
             </div>
@@ -417,9 +476,11 @@ export const DisplayAllAuditoriums = () => {
     [bounds],
   )
 
-  const { data, isLoading } = trpcClient.auditoriums.searchAuditoriums.useQuery({
-    addressWhere: locationFilter,
-  })
+  const { data, isLoading } = trpcClient.auditoriums.searchAuditoriums.useQuery(
+    {
+      addressWhere: locationFilter,
+    },
+  )
 
   if (isLoading) return <LoaderPanel />
 
@@ -432,11 +493,7 @@ export const DisplayAllAuditoriums = () => {
   )
 }
 
-export const MarkerWithPopup = ({
-  marker,
-}: {
-  marker: Auditorium
-}) => {
+export const MarkerWithPopup = ({ marker }: { marker: Auditorium }) => {
   if (!marker.address?.lat || !marker.address?.lng || !marker.id) {
     return null
   }
@@ -503,28 +560,30 @@ export const BookingStepper = ({
     } | null
   } | null>(null)
 
-  const { data: auditoriums, isLoading: isLoadingAuditoriums } = trpcClient.auditoriums.searchAuditoriums.useQuery({
-    where: {},
-    addressWhere: {
-      ne_lat: 0,
-      ne_lng: 0,
-      sw_lat: 0,
-      sw_lng: 0,
-    },
-  })
+  const { data: auditoriums, isLoading: isLoadingAuditoriums } =
+    trpcClient.auditoriums.searchAuditoriums.useQuery({
+      where: {},
+      addressWhere: {
+        ne_lat: 0,
+        ne_lng: 0,
+        sw_lat: 0,
+        sw_lng: 0,
+      },
+    })
 
-  const { data: showtimes, isLoading: isLoadingShowtimes } = trpcClient.showtimes.showtimes.useQuery(
-    {
-      where: {
-        Show: {
-          id: show.id
-        }
-      }
-    },
-    {
-      enabled: !!show.id
-    }
-  )
+  const { data: showtimes, isLoading: isLoadingShowtimes } =
+    trpcClient.showtimes.showtimes.useQuery(
+      {
+        where: {
+          Show: {
+            id: show.id,
+          },
+        },
+      },
+      {
+        enabled: !!show.id,
+      },
+    )
 
   if (isLoadingAuditoriums || isLoadingShowtimes) return <LoaderPanel />
 
@@ -536,7 +595,11 @@ export const BookingStepper = ({
             <DialogTitle>No Auditoriums Available</DialogTitle>
           </DialogHeader>
           <p className="text-gray-600">
-            {noShowsMessages[Math.floor(Math.random() * noShowsMessages.length)]}
+            {
+              noShowsMessages[
+                Math.floor(Math.random() * noShowsMessages.length)
+              ]
+            }
           </p>
         </DialogContent>
       </Dialog>
@@ -551,7 +614,11 @@ export const BookingStepper = ({
             <DialogTitle>No Showtimes Available</DialogTitle>
           </DialogHeader>
           <p className="text-gray-600">
-            {noShowsMessages[Math.floor(Math.random() * noShowsMessages.length)]}
+            {
+              noShowsMessages[
+                Math.floor(Math.random() * noShowsMessages.length)
+              ]
+            }
           </p>
         </DialogContent>
       </Dialog>
@@ -559,8 +626,10 @@ export const BookingStepper = ({
   }
 
   // Filter auditoriums that have showtimes for this show
-  const availableAuditoriums = auditoriums.filter(auditorium => 
-    showtimes.some(showtime => showtime.Screen.AuditoriumId === auditorium.id)
+  const availableAuditoriums = auditoriums.filter((auditorium) =>
+    showtimes.some(
+      (showtime) => showtime.Screen.AuditoriumId === auditorium.id,
+    ),
   )
 
   if (availableAuditoriums.length === 0) {
@@ -571,7 +640,11 @@ export const BookingStepper = ({
             <DialogTitle>No Available Auditoriums</DialogTitle>
           </DialogHeader>
           <p className="text-gray-600">
-            {noShowsMessages[Math.floor(Math.random() * noShowsMessages.length)]}
+            {
+              noShowsMessages[
+                Math.floor(Math.random() * noShowsMessages.length)
+              ]
+            }
           </p>
         </DialogContent>
       </Dialog>
@@ -669,7 +742,7 @@ export const SelectShow = ({
 
 export const ShowRemainingSeats = ({ showtimeId }: { showtimeId: number }) => {
   const { data: seatsInfo } = trpcClient.showtimes.seatsInfo.useQuery({
-    showtimeId
+    showtimeId,
   })
 
   if (!seatsInfo) return null
@@ -678,9 +751,7 @@ export const ShowRemainingSeats = ({ showtimeId }: { showtimeId: number }) => {
   const remaining = total - booked
 
   return (
-    <div className="text-xs text-gray-600">
-      {remaining} seats remaining
-    </div>
+    <div className="text-xs text-gray-600">{remaining} seats remaining</div>
   )
 }
 
@@ -696,16 +767,16 @@ const formatDate = (dateString: string) => {
 }
 
 export const noShowsMessages = [
-  "This movie is taking a short vacation! Check back soon for showtimes.",
-"Our screen is having a siesta from this film. Stay tuned for more shows.",
-"This movie is playing hide-and-seek, and it's winning! Check back later for showtimes.",
-"It's the film's day out, but don't worry, it'll be back soon!",
-"The projector has chosen a different lineup today. Stay tuned for this movie's return.",
-"This movie is nowhere to be scene today, but keep an eye out for future showtimes.",
-"A bit of movie mischief today means this film is taking a break. Check back soon!",
-"The popcorn party is paused for this movie. Stay tuned for future showtimes.",
-"Taking a break from this flick for a fiesta of other films! Check back later.",
-"It's time for some reel relaxation. This movie will return soon!"
+  'This movie is taking a short vacation! Check back soon for showtimes.',
+  'Our screen is having a siesta from this film. Stay tuned for more shows.',
+  "This movie is playing hide-and-seek, and it's winning! Check back later for showtimes.",
+  "It's the film's day out, but don't worry, it'll be back soon!",
+  "The projector has chosen a different lineup today. Stay tuned for this movie's return.",
+  'This movie is nowhere to be scene today, but keep an eye out for future showtimes.',
+  'A bit of movie mischief today means this film is taking a break. Check back soon!',
+  'The popcorn party is paused for this movie. Stay tuned for future showtimes.',
+  'Taking a break from this flick for a fiesta of other films! Check back later.',
+  "It's time for some reel relaxation. This movie will return soon!",
 ]
 
 export const SelectShowtimes = ({
@@ -726,10 +797,11 @@ export const SelectShowtimes = ({
   auditoriumId: number
 }) => {
   const dispatch = useAppDispatch()
-  const { data: showtimesByDate, isLoading } = trpcClient.showtimes.showtimesPerCinema.useQuery({
-    showId: show.id,
-    auditoriumId: auditoriumId,
-  })
+  const { data: showtimesByDate, isLoading } =
+    trpcClient.showtimes.showtimesPerCinema.useQuery({
+      showId: show.id,
+      auditoriumId: auditoriumId,
+    })
 
   if (isLoading) return <LoaderPanel />
 
@@ -741,7 +813,11 @@ export const SelectShowtimes = ({
             <DialogTitle>No Showtimes Available</DialogTitle>
           </DialogHeader>
           <p className="text-gray-600">
-            {noShowsMessages[Math.floor(Math.random() * noShowsMessages.length)]}
+            {
+              noShowsMessages[
+                Math.floor(Math.random() * noShowsMessages.length)
+              ]
+            }
           </p>
         </DialogContent>
       </Dialog>
@@ -757,7 +833,9 @@ export const SelectShowtimes = ({
         <div className="space-y-6">
           {showtimesByDate.map(({ date, showtimes }) => (
             <div key={date}>
-              <h3 className="font-medium mb-2">{format(new Date(date), 'MMMM d, yyyy')}</h3>
+              <h3 className="font-medium mb-2">
+                {format(new Date(date), 'MMMM d, yyyy')}
+              </h3>
               <div className="grid grid-cols-2 gap-2">
                 {showtimes.map((showtime) => (
                   <div
@@ -768,10 +846,14 @@ export const SelectShowtimes = ({
                       {format(new Date(showtime.startTime), 'p')}
                     </div>
                     <div className="text-sm">Rs.{showtime.Screen.price}</div>
-                    <div className="text-xs">{showtime.Screen.projectionType}</div>
-                    <div className="text-xs">{showtime.Screen.soundSystemType}</div>
+                    <div className="text-xs">
+                      {showtime.Screen.projectionType}
+                    </div>
+                    <div className="text-xs">
+                      {showtime.Screen.soundSystemType}
+                    </div>
                     <ShowRemainingSeats showtimeId={showtime.id} />
-                    <Button 
+                    <Button
                       onClick={() => {
                         dispatch(addShowtimeId(showtime.id))
                         onClose()

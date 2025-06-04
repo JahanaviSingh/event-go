@@ -27,12 +27,22 @@ export const showsSlice = createSlice({
     addShowtimeId: (state, action: PayloadAction<number>) => {
       state.selectedShowtimeId = action.payload
     },
-    addSeat: (state, action: PayloadAction<{ row: number; column: number }>) => {
+    addSeat: (
+      state,
+      action: PayloadAction<{ row: number; column: number }>,
+    ) => {
       state.selectedSeats.push(action.payload)
     },
-    removeSeat: (state, action: PayloadAction<{ row: number; column: number }>) => {
+    removeSeat: (
+      state,
+      action: PayloadAction<{ row: number; column: number }>,
+    ) => {
       state.selectedSeats = state.selectedSeats.filter(
-        seat => !(seat.row === action.payload.row && seat.column === action.payload.column)
+        (seat) =>
+          !(
+            seat.row === action.payload.row &&
+            seat.column === action.payload.column
+          ),
       )
     },
     resetShows: (state) => {
@@ -57,4 +67,4 @@ export const {
   resetSeats,
 } = showsSlice.actions
 
-export const showsReducer = showsSlice.reducer 
+export const showsReducer = showsSlice.reducer

@@ -7,16 +7,24 @@ import { Marker } from '@vis.gl/react-maplibre'
 import { useKeypress } from '@/util/hooks/useKeypress'
 
 interface LocationPickerProps {
-  onLocationSelect?: (address: { lat: number; lng: number; formattedAddress: string }) => void
+  onLocationSelect?: (address: {
+    lat: number
+    lng: number
+    formattedAddress: string
+  }) => void
   initialLocation?: { lat: number; lng: number }
 }
 
-export const LocationPicker = ({ onLocationSelect, initialLocation }: LocationPickerProps) => {
+export const LocationPicker = ({
+  onLocationSelect,
+  initialLocation,
+}: LocationPickerProps) => {
   const { current: map } = useMap()
   const [isPicking, setIsPicking] = useState(false)
-  const [markerLocation, setMarkerLocation] = useState<{ lat: number; lng: number } | null>(
-    initialLocation || null
-  )
+  const [markerLocation, setMarkerLocation] = useState<{
+    lat: number
+    lng: number
+  } | null>(initialLocation || null)
 
   // Toggle picking mode with 'P' key
   useKeypress(['p'], () => {
@@ -37,31 +45,34 @@ export const LocationPicker = ({ onLocationSelect, initialLocation }: LocationPi
   })
 
   // Query for reverse geocoding
-  const { refetch: reverseGeocode } = trpcClient.geocoding.reverseGeocode.useQuery(
-    markerLocation ? { lat: markerLocation.lat, lng: markerLocation.lng } : null,
-    {
-      enabled: !!markerLocation, // Only run when we have coordinates
-      onSuccess: (data) => {
-        if (onLocationSelect && data) {
-          onLocationSelect({
-            lat: data.lat,
-            lng: data.lng,
-            formattedAddress: data.formattedAddress,
+  const { refetch: reverseGeocode } =
+    trpcClient.geocoding.reverseGeocode.useQuery(
+      markerLocation
+        ? { lat: markerLocation.lat, lng: markerLocation.lng }
+        : null,
+      {
+        enabled: !!markerLocation, // Only run when we have coordinates
+        onSuccess: (data) => {
+          if (onLocationSelect && data) {
+            onLocationSelect({
+              lat: data.lat,
+              lng: data.lng,
+              formattedAddress: data.formattedAddress,
+            })
+          }
+          notification$.next({
+            message: 'Location selected successfully',
+            type: 'success',
           })
-        }
-        notification$.next({
-          message: 'Location selected successfully',
-          type: 'success',
-        })
+        },
+        onError: () => {
+          notification$.next({
+            message: 'Failed to get address for selected location',
+            type: 'error',
+          })
+        },
       },
-      onError: () => {
-        notification$.next({
-          message: 'Failed to get address for selected location',
-          type: 'error',
-        })
-      },
-    }
-  )
+    )
 
   const handleMapClick = useCallback(
     (e: any) => {
@@ -74,18 +85,15 @@ export const LocationPicker = ({ onLocationSelect, initialLocation }: LocationPi
       setIsPicking(false)
       map.getCanvas().style.cursor = ''
     },
-    [isPicking, map]
+    [isPicking, map],
   )
 
-  const handleMarkerDragEnd = useCallback(
-    (e: any) => {
-      const { lng, lat } = e.lngLat
-      console.log('Dragged marker to:', { lat, lng })
-      setMarkerLocation({ lat, lng })
-      // No need to call reverseGeocode() as the query will run automatically
-    },
-    []
-  )
+  const handleMarkerDragEnd = useCallback((e: any) => {
+    const { lng, lat } = e.lngLat
+    console.log('Dragged marker to:', { lat, lng })
+    setMarkerLocation({ lat, lng })
+    // No need to call reverseGeocode() as the query will run automatically
+  }, [])
 
   // Add click listener when in picking mode
   useEffect(() => {
@@ -162,4 +170,4 @@ export const LocationPicker = ({ onLocationSelect, initialLocation }: LocationPi
       )}
     </>
   )
-} 
+}

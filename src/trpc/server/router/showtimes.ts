@@ -8,7 +8,7 @@ const serverSchemaCreateShowtime = z.object({
   showtimes: z.array(
     z.object({
       time: z.string(),
-    })
+    }),
   ),
 })
 
@@ -160,61 +160,68 @@ export const showtimesRoutes = createTRPCRouter({
             showId,
             startTime: date,
           }
-        }
+        },
       )
       return ctx.db.showtime.createMany({
         data: showtimesInput,
       })
     }),
-  myShowtimes: protectedProcedure('manager')
-    .query(async ({ ctx }) => {
-      const session = await ctx.session
-      if (!session?.userId) {
-        throw new Error('Not authenticated')
-      }
+  myShowtimes: protectedProcedure('manager').query(async ({ ctx }) => {
+    const session = await ctx.session
+    if (!session?.userId) {
+      throw new Error('Not authenticated')
+    }
 
-      const showtimes = await ctx.db.showtime.findMany({
-        where: {
-          Screen: {
-            Auditorium: {
-              Managers: {
-                some: {
-                  id: session.userId
-                }
-              }
-            }
+    const showtimes = await ctx.db.showtime.findMany({
+      where: {
+        Screen: {
+          Auditorium: {
+            Managers: {
+              some: {
+                id: session.userId,
+              },
+            },
           },
-          startTime: {
-            gt: new Date() // Only future showtimes
-          }
         },
-        include: {
-          Show: true,
-          Screen: {
-            include: {
-              Auditorium: true
-            }
-          }
+        startTime: {
+          gt: new Date(), // Only future showtimes
         },
-        orderBy: {
-          startTime: 'asc'
-        }
-      })
+      },
+      include: {
+        Show: true,
+        Screen: {
+          include: {
+            Auditorium: true,
+          },
+        },
+      },
+      orderBy: {
+        startTime: 'asc',
+      },
+    })
 
-      // Group showtimes by date
-      return reduceShowtimeByDate(showtimes)
-    }),
+    // Group showtimes by date
+    return reduceShowtimeByDate(showtimes)
+  }),
   showtimes: publicProcedure
-    .input(z.object({
-      where: z.object({
-        Show: z.object({
-          id: z.number()
-        }).optional(),
-        Screen: z.object({
-          AuditoriumId: z.number()
-        }).optional()
-      }).optional()
-    }))
+    .input(
+      z.object({
+        where: z
+          .object({
+            Show: z
+              .object({
+                id: z.number(),
+              })
+              .optional(),
+            Screen: z
+              .object({
+                AuditoriumId: z.number(),
+              })
+              .optional(),
+          })
+          .optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       return ctx.db.showtime.findMany({
         where: input.where,
@@ -222,13 +229,13 @@ export const showtimesRoutes = createTRPCRouter({
           Show: true,
           Screen: {
             include: {
-              Auditorium: true
-            }
-          }
+              Auditorium: true,
+            },
+          },
         },
         orderBy: {
-          startTime: 'asc'
-        }
+          startTime: 'asc',
+        },
       })
     }),
 })

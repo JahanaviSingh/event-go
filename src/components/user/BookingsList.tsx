@@ -37,13 +37,13 @@ export function BookingsList() {
 
   const today = startOfDay(new Date())
   const upcomingBookings = bookings.filter((booking) =>
-    isAfter(new Date(booking.showtime.startTime), today)
+    isAfter(new Date(booking.showtime.startTime), today),
   )
   const pastBookings = bookings.filter((booking) =>
-    isBefore(new Date(booking.showtime.startTime), today)
+    isBefore(new Date(booking.showtime.startTime), today),
   )
 
-  const BookingCard = ({ booking }: { booking: typeof bookings[0] }) => (
+  const BookingCard = ({ booking }: { booking: (typeof bookings)[0] }) => (
     <div
       key={booking.id}
       className="flex flex-col space-y-2 rounded-lg border p-4"
@@ -68,9 +68,7 @@ export function BookingsList() {
         </div>
         <div className="flex items-center space-x-2">
           <Clock className="h-4 w-4 text-muted-foreground" />
-          <span>
-            {format(new Date(booking.showtime.startTime), 'h:mm a')}
-          </span>
+          <span>{format(new Date(booking.showtime.startTime), 'h:mm a')}</span>
         </div>
         <div className="flex items-center space-x-2">
           <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -98,7 +96,9 @@ export function BookingsList() {
           </TabsList>
           <TabsContent value="upcoming" className="space-y-4">
             {upcomingBookings.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No upcoming bookings.</p>
+              <p className="text-sm text-muted-foreground">
+                No upcoming bookings.
+              </p>
             ) : (
               upcomingBookings.map((booking) => (
                 <BookingCard key={booking.id} booking={booking} />
@@ -123,4 +123,4 @@ export function BookingsList() {
       </CardContent>
     </Card>
   )
-} 
+}

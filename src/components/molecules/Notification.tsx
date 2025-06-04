@@ -1,5 +1,10 @@
 import { useNotificationStore } from '@/store/notification'
-import { IconCheck, IconX, IconInfoCircle, IconAlertTriangle } from '@tabler/icons-react'
+import {
+  IconCheck,
+  IconX,
+  IconInfoCircle,
+  IconAlertTriangle,
+} from '@tabler/icons-react'
 
 const icons = {
   success: IconCheck,
@@ -40,4 +45,4 @@ export const Notification = () => {
       })}
     </div>
   )
-} 
+}

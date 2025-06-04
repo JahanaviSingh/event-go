@@ -32,7 +32,7 @@ export default function BookingsPage() {
     const fetchTickets = async () => {
       try {
         console.log('=== Starting to fetch tickets ===')
-        
+
         // First check ticket status
         const checkResponse = await fetch('/api/tickets/check')
         const checkData = await checkResponse.json()
@@ -45,15 +45,19 @@ export default function BookingsPage() {
         // Then fetch the actual tickets
         const response = await fetch('/api/tickets/user')
         console.log('Response status:', response.status)
-        
+
         if (!response.ok) {
-          console.error('Failed to fetch tickets:', response.status, response.statusText)
+          console.error(
+            'Failed to fetch tickets:',
+            response.status,
+            response.statusText,
+          )
           throw new Error('Failed to fetch tickets')
         }
 
         const data = await response.json()
         console.log('Raw API response:', data)
-        
+
         if (!data.tickets || !Array.isArray(data.tickets)) {
           console.error('Invalid tickets data received:', data)
           throw new Error('Invalid tickets data')
@@ -61,7 +65,7 @@ export default function BookingsPage() {
 
         console.log('Number of tickets received:', data.tickets.length)
         console.log('Tickets data:', data.tickets)
-        
+
         setTickets(data.tickets)
       } catch (error) {
         console.error('Error in fetchTickets:', error)
@@ -98,16 +102,18 @@ export default function BookingsPage() {
   const handleShare = async (ticket: Ticket) => {
     try {
       if (navigator.share) {
-        await navigator.share({
-          title: `Ticket for ${ticket.showTitle}`,
-          text: `I'm going to see ${ticket.showTitle} on ${format(new Date(ticket.showtime), 'PPp')}!`,
-          url: window.location.href,
-        }).catch((error) => {
-          if (error.name !== 'AbortError') {
-            console.error('Error sharing ticket:', error)
-            toast.error('Failed to share ticket')
-          }
-        })
+        await navigator
+          .share({
+            title: `Ticket for ${ticket.showTitle}`,
+            text: `I'm going to see ${ticket.showTitle} on ${format(new Date(ticket.showtime), 'PPp')}!`,
+            url: window.location.href,
+          })
+          .catch((error) => {
+            if (error.name !== 'AbortError') {
+              console.error('Error sharing ticket:', error)
+              toast.error('Failed to share ticket')
+            }
+          })
       } else {
         await navigator.clipboard.writeText(window.location.href)
         toast.success('Ticket link copied to clipboard!')
@@ -133,7 +139,9 @@ export default function BookingsPage() {
       <div className="min-h-screen flex flex-col items-center justify-center">
         <IconTicket className="w-16 h-16 text-gray-400 mb-4" />
         <h1 className="text-2xl font-semibold mb-4">No Bookings Found</h1>
-        <p className="text-gray-600 mb-8">You haven't booked any tickets yet.</p>
+        <p className="text-gray-600 mb-8">
+          You haven't booked any tickets yet.
+        </p>
         <Button onClick={() => router.push('/')}>Browse Shows</Button>
       </div>
     )
@@ -145,7 +153,10 @@ export default function BookingsPage() {
         <h1 className="text-2xl font-bold mb-8">My Bookings</h1>
         <div className="space-y-6">
           {tickets.map((ticket) => (
-            <div key={ticket.ticketId} className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div
+              key={ticket.ticketId}
+              className="bg-white rounded-lg shadow-lg overflow-hidden"
+            >
               {/* Ticket Header */}
               <div className="bg-primary text-white p-6">
                 <h2 className="text-xl font-bold mb-2">{ticket.showTitle}</h2>
@@ -160,21 +171,29 @@ export default function BookingsPage() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Venue</span>
-                      <span className="font-medium">{ticket.auditorium.name}</span>
+                      <span className="font-medium">
+                        {ticket.auditorium.name}
+                      </span>
                     </div>
                     {ticket.auditorium.address && (
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600">Address</span>
-                        <span className="font-medium text-right">{ticket.auditorium.address}</span>
+                        <span className="font-medium text-right">
+                          {ticket.auditorium.address}
+                        </span>
                       </div>
                     )}
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Screen</span>
-                      <span className="font-medium">{ticket.auditorium.screenNumber}</span>
+                      <span className="font-medium">
+                        {ticket.auditorium.screenNumber}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Seats</span>
-                      <span className="font-medium">{ticket.seats.join(', ')}</span>
+                      <span className="font-medium">
+                        {ticket.seats.join(', ')}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Amount</span>
@@ -182,7 +201,9 @@ export default function BookingsPage() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Ticket ID</span>
-                      <span className="font-medium text-sm">{ticket.ticketId}</span>
+                      <span className="font-medium text-sm">
+                        {ticket.ticketId}
+                      </span>
                     </div>
                   </div>
 
@@ -196,7 +217,9 @@ export default function BookingsPage() {
                       />
                     ) : (
                       <div className="w-48 h-48 flex items-center justify-center bg-gray-100 rounded mb-4">
-                        <p className="text-gray-500 text-sm">QR Code not available</p>
+                        <p className="text-gray-500 text-sm">
+                          QR Code not available
+                        </p>
                       </div>
                     )}
 
@@ -229,4 +252,4 @@ export default function BookingsPage() {
       </div>
     </div>
   )
-} 
+}

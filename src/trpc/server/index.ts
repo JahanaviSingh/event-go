@@ -71,7 +71,7 @@ const isAuthed = t.middleware(async ({ ctx, next }) => {
 
 export const protectedProcedure = (...roles: Role[]) => {
   const procedure = t.procedure.use(isAuthed)
-  
+
   if (roles.length > 0) {
     return procedure.use(async ({ ctx, next }) => {
       try {
@@ -89,6 +89,6 @@ export const protectedProcedure = (...roles: Role[]) => {
       }
     })
   }
-  
+
   return procedure
 }

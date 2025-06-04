@@ -1,6 +1,9 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '..'
-import { findManyAuditoriumArgsSchema, createAuditoriumSchema } from './dtos/auditoriums.input'
+import {
+  findManyAuditoriumArgsSchema,
+  createAuditoriumSchema,
+} from './dtos/auditoriums.input'
 import { locationFilter } from './dtos/common'
 
 export const auditoriumsRouter = createTRPCRouter({
@@ -43,13 +46,13 @@ export const auditoriumsRouter = createTRPCRouter({
       }
       return ctx.db.auditorium.findUnique({
         where: { id: auditoriumId },
-        include: { 
+        include: {
           Address: true,
           Screens: {
             include: {
-              Seats: true
-            }
-          }
+              Seats: true,
+            },
+          },
         },
       })
     }),
@@ -114,9 +117,9 @@ export const auditoriumsRouter = createTRPCRouter({
           ...input?.where,
           Managers: {
             some: {
-              id: session.userId
-            }
-          }
+              id: session.userId,
+            },
+          },
         },
         include: {
           Address: true,
@@ -124,12 +127,12 @@ export const auditoriumsRouter = createTRPCRouter({
             include: {
               Showtimes: {
                 include: {
-                  Show: true
-                }
-              }
-            }
-          }
-        }
+                  Show: true,
+                },
+              },
+            },
+          },
+        },
       })
     }),
 
@@ -141,17 +144,17 @@ export const auditoriumsRouter = createTRPCRouter({
       }
       return ctx.db.screen.findMany({
         where: {
-          AuditoriumId: input.auditoriumId
+          AuditoriumId: input.auditoriumId,
         },
         include: {
           Auditorium: true,
           Seats: true,
           Showtimes: {
             include: {
-              Show: true
-            }
-          }
-        }
+              Show: true,
+            },
+          },
+        },
       })
     }),
 
@@ -167,52 +170,54 @@ export const auditoriumsRouter = createTRPCRouter({
           where: {
             Showtime: {
               Screen: {
-                AuditoriumId: id
-              }
-            }
-          }
+                AuditoriumId: id,
+              },
+            },
+          },
         }),
         // Delete all showtimes in this auditorium
         ctx.db.showtime.deleteMany({
           where: {
             Screen: {
-              AuditoriumId: id
-            }
-          }
+              AuditoriumId: id,
+            },
+          },
         }),
         // Delete all seats in this auditorium
         ctx.db.seat.deleteMany({
           where: {
             Screen: {
-              AuditoriumId: id
-            }
-          }
+              AuditoriumId: id,
+            },
+          },
         }),
         // Delete all screens in this auditorium
         ctx.db.screen.deleteMany({
           where: {
-            AuditoriumId: id
-          }
+            AuditoriumId: id,
+          },
         }),
         // Delete the address
         ctx.db.address.deleteMany({
           where: {
-            AuditoriumId: id
-          }
+            AuditoriumId: id,
+          },
         }),
         // Finally delete the auditorium
         ctx.db.auditorium.delete({
-          where: { id }
-        })
+          where: { id },
+        }),
       ])
 
       return { success: true }
     }),
 
   updateAuditorium: protectedProcedure('admin')
-    .input(createAuditoriumSchema.extend({
-      id: z.number()
-    }))
+    .input(
+      createAuditoriumSchema.extend({
+        id: z.number(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const { id, ...data } = input
       const session = await ctx.session
@@ -224,33 +229,33 @@ export const auditoriumsRouter = createTRPCRouter({
           where: {
             Showtime: {
               Screen: {
-                AuditoriumId: id
-              }
-            }
-          }
+                AuditoriumId: id,
+              },
+            },
+          },
         }),
         // Delete all showtimes in this auditorium
         ctx.db.showtime.deleteMany({
           where: {
             Screen: {
-              AuditoriumId: id
-            }
-          }
+              AuditoriumId: id,
+            },
+          },
         }),
         // Delete all seats in this auditorium
         ctx.db.seat.deleteMany({
           where: {
             Screen: {
-              AuditoriumId: id
-            }
-          }
+              AuditoriumId: id,
+            },
+          },
         }),
         // Delete all screens in this auditorium
         ctx.db.screen.deleteMany({
           where: {
-            AuditoriumId: id
-          }
-        })
+            AuditoriumId: id,
+          },
+        }),
       ])
 
       // Update auditorium
@@ -261,39 +266,39 @@ export const auditoriumsRouter = createTRPCRouter({
           Managers: {
             connectOrCreate: {
               create: {
-                id: session.userId
+                id: session.userId,
               },
               where: {
-                id: session.userId
-              }
-            }
+                id: session.userId,
+              },
+            },
           },
           Address: {
             upsert: {
               create: {
                 lat: data.address.lat,
                 lng: data.address.lng,
-                address: data.address.address
+                address: data.address.address,
               },
               update: {
                 lat: data.address.lat,
                 lng: data.address.lng,
-                address: data.address.address
-              }
-            }
+                address: data.address.address,
+              },
+            },
           },
           Screens: {
             create: data.screens.map((screen, index) => ({
               number: index,
               projectionType: screen.projectionType,
-              soundSystemType: screen.soundSystemType
-            }))
-          }
+              soundSystemType: screen.soundSystemType,
+            })),
+          },
         },
         include: {
           Address: true,
-          Screens: true
-        }
+          Screens: true,
+        },
       })
 
       return auditorium

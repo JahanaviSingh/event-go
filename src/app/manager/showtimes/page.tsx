@@ -6,7 +6,8 @@ import Image from 'next/image'
 import { Title2 } from '@/components/atoms/typography'
 
 export default function Page() {
-  const { data: showtimesByDate, isLoading } = trpcClient.showtimes.myShowtimes.useQuery()
+  const { data: showtimesByDate, isLoading } =
+    trpcClient.showtimes.myShowtimes.useQuery()
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -68,4 +69,4 @@ export default function Page() {
       </div>
     </main>
   )
-} 
+}

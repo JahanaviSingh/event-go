@@ -12,15 +12,18 @@ export const trpcClient = createTRPCReact<AppRouter>()
 
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
   const { getToken } = useAuth()
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: 1,
-        refetchOnWindowFocus: false,
-        retryOnMount: true,
-      },
-    },
-  }))
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: 1,
+            refetchOnWindowFocus: false,
+            retryOnMount: true,
+          },
+        },
+      }),
+  )
 
   const [trpc] = useState(() =>
     trpcClient.createClient({

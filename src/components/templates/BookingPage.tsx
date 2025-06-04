@@ -16,12 +16,14 @@ export const BookingPage = () => {
   const { toast } = useToast()
   const [isBooking, setIsBooking] = useState(false)
 
-  const selectedShowtimeId = useAppSelector((state) => state.shows.selectedShowtimeId)
+  const selectedShowtimeId = useAppSelector(
+    (state) => state.shows.selectedShowtimeId,
+  )
   const selectedSeats = useAppSelector((state) => state.shows.selectedSeats)
 
   const { data: showtimeData, isLoading } = trpcClient.showtimes.seats.useQuery(
     { showtimeId: selectedShowtimeId! },
-    { enabled: !!selectedShowtimeId }
+    { enabled: !!selectedShowtimeId },
   )
 
   if (!selectedShowtimeId) {
@@ -35,10 +37,12 @@ export const BookingPage = () => {
   const totalPrice = selectedSeats.length * price
 
   const handleSeatClick = (row: number, column: number) => {
-    const seat = seats.find(s => s.row === row && s.column === column)
+    const seat = seats.find((s) => s.row === row && s.column === column)
     if (seat?.booked) return
 
-    const isSelected = selectedSeats.some(s => s.row === row && s.column === column)
+    const isSelected = selectedSeats.some(
+      (s) => s.row === row && s.column === column,
+    )
     if (isSelected) {
       dispatch({ type: 'shows/removeSeat', payload: { row, column } })
     } else {
@@ -49,9 +53,9 @@ export const BookingPage = () => {
   const handleBooking = async () => {
     if (selectedSeats.length === 0) {
       toast({
-        title: "No seats selected",
-        description: "Please select at least one seat to proceed",
-        variant: "destructive"
+        title: 'No seats selected',
+        description: 'Please select at least one seat to proceed',
+        variant: 'destructive',
       })
       return
     }
@@ -61,21 +65,22 @@ export const BookingPage = () => {
       // Create booking
       const booking = await trpcClient.bookings.create.mutate({
         showtimeId: selectedShowtimeId,
-        seats: selectedSeats
+        seats: selectedSeats,
       })
 
       toast({
-        title: "Booking successful!",
-        description: "Your tickets have been booked",
+        title: 'Booking successful!',
+        description: 'Your tickets have been booked',
       })
 
       // Redirect to tickets page
       router.push('/tickets')
     } catch (error) {
       toast({
-        title: "Booking failed",
-        description: error instanceof Error ? error.message : "Failed to create booking",
-        variant: "destructive"
+        title: 'Booking failed',
+        description:
+          error instanceof Error ? error.message : 'Failed to create booking',
+        variant: 'destructive',
       })
     } finally {
       setIsBooking(false)
@@ -87,7 +92,10 @@ export const BookingPage = () => {
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2">Select Your Seats</h1>
         <div className="text-gray-600">
-          <p>Showtime: {format(new Date(showtimeData?.showtime.startTime || ''), 'PPp')}</p>
+          <p>
+            Showtime:{' '}
+            {format(new Date(showtimeData?.showtime.startTime || ''), 'PPp')}
+          </p>
           <p>Price per seat: ₹{price}</p>
         </div>
       </div>
@@ -107,11 +115,14 @@ export const BookingPage = () => {
             disabled={seat.booked}
             className={`
               w-8 h-8 rounded flex items-center justify-center text-sm
-              ${seat.booked 
-                ? 'bg-gray-300 cursor-not-allowed' 
-                : selectedSeats.some(s => s.row === seat.row && s.column === seat.column)
-                  ? 'bg-primary text-white'
-                  : 'bg-gray-100 hover:bg-gray-200'
+              ${
+                seat.booked
+                  ? 'bg-gray-300 cursor-not-allowed'
+                  : selectedSeats.some(
+                        (s) => s.row === seat.row && s.column === seat.column,
+                      )
+                    ? 'bg-primary text-white'
+                    : 'bg-gray-100 hover:bg-gray-200'
               }
             `}
           >
@@ -142,7 +153,9 @@ export const BookingPage = () => {
         <div className="space-y-2">
           <div className="flex justify-between">
             <span>Selected Seats:</span>
-            <span>{selectedSeats.length} <IconArmchair className="inline w-4 h-4" /></span>
+            <span>
+              {selectedSeats.length} <IconArmchair className="inline w-4 h-4" />
+            </span>
           </div>
           <div className="flex justify-between">
             <span>Price per seat:</span>
@@ -156,7 +169,7 @@ export const BookingPage = () => {
       </div>
 
       {/* Book Button */}
-      <Button 
+      <Button
         onClick={handleBooking}
         disabled={selectedSeats.length === 0 || isBooking}
         className="w-full"
@@ -165,4 +178,4 @@ export const BookingPage = () => {
       </Button>
     </div>
   )
-} 
+}

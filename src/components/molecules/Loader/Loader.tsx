@@ -9,7 +9,7 @@ export const Loader = ({ className, ...props }: LoaderProps) => {
     <div
       className={cn(
         'animate-spin rounded-full border-2 border-current border-t-transparent',
-        className
+        className,
       )}
       {...props}
     >
@@ -23,11 +23,11 @@ export const LoaderPanel = ({ className, ...props }: LoaderProps) => {
     <div
       className={cn(
         'fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm',
-        className
+        className,
       )}
       {...props}
     >
       <Loader className="h-8 w-8" />
     </div>
   )
-} 
+}

@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
 
         const isCorrectPassword = await bcrypt.compare(
           credentials.password,
-          user.password
+          user.password,
         )
 
         if (!isCorrectPassword) {
@@ -82,4 +82,4 @@ export const authOptions: NextAuthOptions = {
       }
     },
   },
-} 
+}

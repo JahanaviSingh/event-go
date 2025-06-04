@@ -51,7 +51,11 @@ export const CreateShowtimeContent = ({}: ICreateShowtimeProps) => {
           console.log('Form data:', formData)
           console.log('Form errors:', errors)
           try {
-            if (formData.showId <= 0 || formData.auditoriumId <= 0 || formData.screenId <= 0) {
+            if (
+              formData.showId <= 0 ||
+              formData.auditoriumId <= 0 ||
+              formData.screenId <= 0
+            ) {
               toast({ title: 'Please select a show, auditorium, and screen' })
               return
             }
@@ -85,7 +89,9 @@ export const CreateShowtimeContent = ({}: ICreateShowtimeProps) => {
             replace('/manager/auditoriums')
           } catch (error) {
             console.error('Submission error:', error)
-            toast({ title: `Failed: ${error instanceof Error ? error.message : 'Unknown error'}` })
+            toast({
+              title: `Failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            })
           }
         })}
       >
@@ -192,7 +198,7 @@ export const SelectShow = ({
     const searchParams = new URLSearchParams(window.location.search)
     const latParam = searchParams.get('lat')
     const lngParam = searchParams.get('lng')
-    
+
     if (latParam && lngParam) {
       setLat(parseFloat(latParam))
       setLng(parseFloat(lngParam))
@@ -206,10 +212,11 @@ export const SelectShow = ({
     }
   }, [])
 
-  const { data: showsData, isLoading, error: queryError } = trpcClient.shows.shows.useQuery(
-    { lat, lng, city },
-    { enabled: true }
-  )
+  const {
+    data: showsData,
+    isLoading,
+    error: queryError,
+  } = trpcClient.shows.shows.useQuery({ lat, lng, city }, { enabled: true })
 
   const shows = showsData?.shows ?? []
 
@@ -249,7 +256,9 @@ export const SelectShow = ({
         className="w-full p-2 border rounded"
         onChange={(e) => setValue(Number(e.target.value))}
       >
-        <option value="" disabled>Select a show</option>
+        <option value="" disabled>
+          Select a show
+        </option>
         {shows.map((show) => (
           <option key={show.id} value={show.id}>
             {show.title} ({show.duration} mins)
@@ -267,13 +276,17 @@ export const SelectAuditorium = ({
   setValue: (id: number) => void
   error?: string
 }) => {
-  const { data: auditoriums, isLoading, error: queryError } = trpcClient.auditoriums.searchAuditoriums.useQuery({
+  const {
+    data: auditoriums,
+    isLoading,
+    error: queryError,
+  } = trpcClient.auditoriums.searchAuditoriums.useQuery({
     addressWhere: {
       ne_lat: 90,
       ne_lng: 180,
       sw_lat: -90,
-      sw_lng: -180
-    }
+      sw_lng: -180,
+    },
   })
 
   if (isLoading) {
@@ -299,9 +312,7 @@ export const SelectAuditorium = ({
   if (!auditoriums || auditoriums.length === 0) {
     return (
       <Label title="Auditorium" error={error}>
-        <div className="p-4 text-gray-500">
-          No auditoriums available
-        </div>
+        <div className="p-4 text-gray-500">No auditoriums available</div>
       </Label>
     )
   }
@@ -313,7 +324,9 @@ export const SelectAuditorium = ({
         onChange={(e) => setValue(Number(e.target.value))}
         defaultValue=""
       >
-        <option value="" disabled>Select an auditorium</option>
+        <option value="" disabled>
+          Select an auditorium
+        </option>
         {auditoriums.map((auditorium) => (
           <option key={auditorium.id} value={auditorium.id}>
             {auditorium.name} ({auditorium.Screens.length} screens)
@@ -333,11 +346,15 @@ export const SelectScreen = ({
   error?: string
   auditoriumId?: number
 }) => {
-  const { data: screens, isLoading, error: queryError } = trpcClient.auditoriums.myScreens.useQuery(
+  const {
+    data: screens,
+    isLoading,
+    error: queryError,
+  } = trpcClient.auditoriums.myScreens.useQuery(
     { auditoriumId: auditoriumId || -1 },
-    { 
-      enabled: !!auditoriumId && auditoriumId > 0
-    }
+    {
+      enabled: !!auditoriumId && auditoriumId > 0,
+    },
   )
 
   if (!auditoriumId || auditoriumId <= 0) {
@@ -387,10 +404,13 @@ export const SelectScreen = ({
         onChange={(e) => setValue(Number(e.target.value))}
         defaultValue=""
       >
-        <option value="" disabled>Select a screen</option>
+        <option value="" disabled>
+          Select a screen
+        </option>
         {screens.map((screen) => (
           <option key={screen.id} value={screen.id}>
-            Screen {screen.number} - {screen.projectionType} ({screen.soundSystemType})
+            Screen {screen.number} - {screen.projectionType} (
+            {screen.soundSystemType})
           </option>
         ))}
       </select>

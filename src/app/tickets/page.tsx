@@ -83,7 +83,7 @@ export default function TicketsPage() {
           totalAmount: booking.totalAmount,
           showtimeId: booking.showtimeId,
           screenId: booking.screenId,
-          auditorium: booking.auditorium
+          auditorium: booking.auditorium,
         })
 
         const response = await fetch('/api/tickets/generate', {
@@ -99,7 +99,7 @@ export default function TicketsPage() {
             totalAmount: booking.totalAmount,
             showtimeId: booking.showtimeId,
             screenId: booking.screenId,
-            auditorium: booking.auditorium
+            auditorium: booking.auditorium,
           }),
         })
 
@@ -124,7 +124,9 @@ export default function TicketsPage() {
         localStorage.removeItem('currentBooking')
       } catch (error) {
         console.error('Error fetching ticket:', error)
-        toast.error(error instanceof Error ? error.message : 'Failed to load ticket')
+        toast.error(
+          error instanceof Error ? error.message : 'Failed to load ticket',
+        )
         router.push('/')
       } finally {
         setIsLoading(false)
@@ -150,17 +152,19 @@ export default function TicketsPage() {
 
     try {
       if (navigator.share) {
-        await navigator.share({
-          title: `Ticket for ${ticket.showTitle}`,
-          text: `I'm going to see ${ticket.showTitle} on ${format(new Date(ticket.showtime), 'PPp')}!`,
-          url: window.location.href,
-        }).catch((error) => {
-          // Don't show error for user cancellation
-          if (error.name !== 'AbortError') {
-            console.error('Error sharing ticket:', error)
-            toast.error('Failed to share ticket')
-          }
-        })
+        await navigator
+          .share({
+            title: `Ticket for ${ticket.showTitle}`,
+            text: `I'm going to see ${ticket.showTitle} on ${format(new Date(ticket.showtime), 'PPp')}!`,
+            url: window.location.href,
+          })
+          .catch((error) => {
+            // Don't show error for user cancellation
+            if (error.name !== 'AbortError') {
+              console.error('Error sharing ticket:', error)
+              toast.error('Failed to share ticket')
+            }
+          })
       } else {
         await navigator.clipboard.writeText(window.location.href)
         toast.success('Ticket link copied to clipboard!')
@@ -197,10 +201,10 @@ export default function TicketsPage() {
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Ticket Header */}
           <div className="bg-primary text-white p-6">
-            <h1 className="text-2xl font-bold mb-2">{ticket.showTitle || 'Untitled Show'}</h1>
-            <p className="text-sm opacity-90">
-              {formatDate(ticket.showtime)}
-            </p>
+            <h1 className="text-2xl font-bold mb-2">
+              {ticket.showTitle || 'Untitled Show'}
+            </h1>
+            <p className="text-sm opacity-90">{formatDate(ticket.showtime)}</p>
           </div>
 
           {/* Ticket Content */}
@@ -208,17 +212,25 @@ export default function TicketsPage() {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Venue</span>
-                <span className="font-medium">{ticket.auditorium?.name || 'N/A'}</span>
+                <span className="font-medium">
+                  {ticket.auditorium?.name || 'N/A'}
+                </span>
               </div>
               {ticket.auditorium?.address && (
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Address</span>
-                  <span className="font-medium text-right">{ticket.auditorium.address}</span>
+                  <span className="font-medium text-right">
+                    {ticket.auditorium.address}
+                  </span>
                 </div>
               )}
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Screen</span>
-                <span className="font-medium">{ticket.auditorium?.screenNumber || ticket.screenNumber || 'N/A'}</span>
+                <span className="font-medium">
+                  {ticket.auditorium?.screenNumber ||
+                    ticket.screenNumber ||
+                    'N/A'}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Seats</span>
@@ -230,18 +242,16 @@ export default function TicketsPage() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Ticket ID</span>
-                <span className="font-medium text-sm">{ticket.ticketId || 'N/A'}</span>
+                <span className="font-medium text-sm">
+                  {ticket.ticketId || 'N/A'}
+                </span>
               </div>
             </div>
 
             {/* QR Code */}
             <div className="mt-8 flex justify-center">
               {qrCode ? (
-                <img
-                  src={qrCode}
-                  alt="Ticket QR Code"
-                  className="w-48 h-48"
-                />
+                <img src={qrCode} alt="Ticket QR Code" className="w-48 h-48" />
               ) : (
                 <div className="w-48 h-48 flex items-center justify-center bg-gray-100 rounded">
                   <p className="text-gray-500 text-sm">QR Code not available</p>
@@ -275,4 +285,4 @@ export default function TicketsPage() {
       </div>
     </div>
   )
-} 
+}

@@ -95,7 +95,7 @@ export const usersRouter = createTRPCRouter({
             push: z.boolean(),
           })
           .optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
@@ -125,4 +125,4 @@ export const usersRouter = createTRPCRouter({
         })
       }
     }),
-}) 
+})

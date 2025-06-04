@@ -20,4 +20,4 @@ export const citiesSlice = createSlice({
 
 export const { addCityId } = citiesSlice.actions
 
-export const citiesReducer = citiesSlice.reducer 
+export const citiesReducer = citiesSlice.reducer

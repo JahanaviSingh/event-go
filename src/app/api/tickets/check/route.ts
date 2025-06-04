@@ -6,10 +6,7 @@ export async function GET(request: Request) {
   try {
     const { userId } = getAuth(request)
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Check all tickets in the database
@@ -22,20 +19,20 @@ export async function GET(request: Request) {
                 Show: true,
                 Screen: {
                   include: {
-                    Auditorium: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                    Auditorium: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
 
     // Check tickets for the current user
     const userTickets = await prisma.ticket.findMany({
       where: {
-        uid: userId
+        uid: userId,
       },
       include: {
         Bookings: {
@@ -45,14 +42,14 @@ export async function GET(request: Request) {
                 Show: true,
                 Screen: {
                   include: {
-                    Auditorium: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                    Auditorium: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
 
     return NextResponse.json({
@@ -61,7 +58,7 @@ export async function GET(request: Request) {
         userId,
         totalTickets: allTickets.length,
         userTickets: userTickets.length,
-        tickets: userTickets.map(ticket => ({
+        tickets: userTickets.map((ticket) => ({
           id: ticket.id,
           uid: ticket.uid,
           createdAt: ticket.createdAt,
@@ -69,15 +66,16 @@ export async function GET(request: Request) {
           showTitle: ticket.Bookings[0]?.Showtime?.Show?.title,
           showtime: ticket.Bookings[0]?.Showtime?.startTime,
           screenNumber: ticket.Bookings[0]?.Showtime?.Screen?.number,
-          auditoriumName: ticket.Bookings[0]?.Showtime?.Screen?.Auditorium?.name
-        }))
-      }
+          auditoriumName:
+            ticket.Bookings[0]?.Showtime?.Screen?.Auditorium?.name,
+        })),
+      },
     })
   } catch (error) {
     console.error('Error checking tickets:', error)
     return NextResponse.json(
       { error: 'Failed to check tickets' },
-      { status: 500 }
+      { status: 500 },
     )
   }
-} 
+}

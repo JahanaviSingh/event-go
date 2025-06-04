@@ -46,22 +46,29 @@ const handler = async (req: NextRequest) => {
 
     return response
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'An unexpected error occurred'
-    const code = error instanceof TRPCError ? error.code : 'INTERNAL_SERVER_ERROR'
-    
+    const message =
+      error instanceof Error ? error.message : 'An unexpected error occurred'
+    const code =
+      error instanceof TRPCError ? error.code : 'INTERNAL_SERVER_ERROR'
+
     return new Response(
       JSON.stringify({
         error: code,
         message,
       }),
       {
-        status: code === 'UNAUTHORIZED' ? 401 : 
-                code === 'FORBIDDEN' ? 403 : 
-                code === 'NOT_FOUND' ? 404 : 500,
+        status:
+          code === 'UNAUTHORIZED'
+            ? 401
+            : code === 'FORBIDDEN'
+              ? 403
+              : code === 'NOT_FOUND'
+                ? 404
+                : 500,
         headers: {
           'Content-Type': 'application/json',
         },
-      }
+      },
     )
   }
 }

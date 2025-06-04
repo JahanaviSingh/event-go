@@ -40,7 +40,7 @@ const LOCATIONS = [
 export function PreferencesForm() {
   const [isEditing, setIsEditing] = useState(false)
   const utils = api.useUtils()
-  
+
   const { data: profile } = api.user.getProfile.useQuery()
   const updatePreferences = api.user.updatePreferences.useMutation({
     onSuccess: () => {
@@ -117,7 +117,10 @@ export function PreferencesForm() {
             <Select
               value={preferences.preferredLocation}
               onValueChange={(value) =>
-                setPreferences((prev) => ({ ...prev, preferredLocation: value }))
+                setPreferences((prev) => ({
+                  ...prev,
+                  preferredLocation: value,
+                }))
               }
             >
               <SelectTrigger>
@@ -216,10 +219,13 @@ export function PreferencesForm() {
                 setIsEditing(false)
                 setPreferences({
                   favoriteGenre: profile.preferences?.favoriteGenre ?? '',
-                  preferredLocation: profile.preferences?.preferredLocation ?? '',
+                  preferredLocation:
+                    profile.preferences?.preferredLocation ?? '',
                   notificationSettings: {
-                    email: profile.preferences?.notificationSettings?.email ?? false,
-                    push: profile.preferences?.notificationSettings?.push ?? false,
+                    email:
+                      profile.preferences?.notificationSettings?.email ?? false,
+                    push:
+                      profile.preferences?.notificationSettings?.push ?? false,
                   },
                 })
               }}
@@ -232,4 +238,4 @@ export function PreferencesForm() {
       </CardContent>
     </Card>
   )
-} 
+}

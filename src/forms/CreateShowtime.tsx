@@ -20,7 +20,12 @@ export type FormTypeCreateShowtime = z.infer<typeof formSchemaCreateShowtime>
 export const useFormCreateShowtime = () =>
   useForm<FormTypeCreateShowtime>({
     resolver: zodResolver(formSchemaCreateShowtime),
-    defaultValues: { showId: -99, screenId: -99, auditoriumId: -99, showtimes: [] },
+    defaultValues: {
+      showId: -99,
+      screenId: -99,
+      auditoriumId: -99,
+      showtimes: [],
+    },
   })
 
 export const FormProviderCreateShowtime = ({

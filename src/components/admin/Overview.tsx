@@ -1,5 +1,12 @@
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { trpcClient } from "@/trpc/clients/client"
+import {
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { trpcClient } from '@/trpc/clients/client'
 
 export function Overview() {
   const { data: revenueData } = trpcClient.admin.getRevenueTrend.useQuery()
@@ -32,4 +39,4 @@ export function Overview() {
       </LineChart>
     </ResponsiveContainer>
   )
-} 
+}

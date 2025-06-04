@@ -8,7 +8,7 @@ const createManagerSchema = z.object({
 })
 
 export const managersRouter = createTRPCRouter({
-  dashboard: protectedProcedure('manager','admin').query(async ({ ctx }) => {
+  dashboard: protectedProcedure('manager', 'admin').query(async ({ ctx }) => {
     const auditoriumCount = await ctx.db.auditorium.count({
       where: { Managers: { some: { id: ctx.session.userId } } },
     })
@@ -18,7 +18,7 @@ export const managersRouter = createTRPCRouter({
   managerMe: protectedProcedure().query(async ({ ctx }) => {
     const session = await ctx.session
     if (!session.userId) return null
-    
+
     return ctx.db.manager.findUnique({
       where: { id: session.userId },
       include: { User: true },
@@ -48,12 +48,12 @@ export const managersRouter = createTRPCRouter({
               id: user.id,
               name: input.name,
               email: input.email,
-            }
-          }
+            },
+          },
         },
         include: {
-          User: true
-        }
+          User: true,
+        },
       })
     }),
 })

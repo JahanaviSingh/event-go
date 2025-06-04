@@ -29,4 +29,4 @@ export async function generateQRCode(data: TicketData): Promise<string> {
     console.error('Error generating QR code:', error)
     throw new Error('Failed to generate QR code')
   }
-} 
+}

@@ -3,12 +3,22 @@
 import { useEffect, useState, use } from 'react'
 import { trpcClient } from '@/trpc/clients/client'
 import { Loader } from '@/components/molecules/Loader'
-import { IconClock, IconCalendar, IconMapPin, IconTicket } from '@tabler/icons-react'
+import {
+  IconClock,
+  IconCalendar,
+  IconMapPin,
+  IconTicket,
+} from '@tabler/icons-react'
 import { format } from 'date-fns'
 import Image from 'next/image'
 import { Button } from '@/components/atoms/button'
 import { toast } from 'sonner'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/atoms/Dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/atoms/Dialog'
 import { BookingStepper } from '@/components/templates/SearchAuditorium'
 import { useRouter } from 'next/navigation'
 import { useAppDispatch } from '@/store'
@@ -26,7 +36,7 @@ export default function ShowPage({ params }: ShowPageProps) {
   const dispatch = useAppDispatch()
 
   const { data: showData, isLoading } = trpcClient.shows.shows.useQuery({
-    id: parseInt(resolvedParams.id)
+    id: parseInt(resolvedParams.id),
   })
 
   const show = showData?.shows?.[0]
@@ -35,13 +45,13 @@ export default function ShowPage({ params }: ShowPageProps) {
     {
       where: {
         Show: {
-          id: parseInt(resolvedParams.id)
-        }
-      }
+          id: parseInt(resolvedParams.id),
+        },
+      },
     },
     {
-      enabled: !!resolvedParams.id
-    }
+      enabled: !!resolvedParams.id,
+    },
   )
 
   if (isLoading || !show) {
@@ -73,19 +83,25 @@ export default function ShowPage({ params }: ShowPageProps) {
     if (!genre) return 'Not specified'
     return genre
       .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ')
   }
 
   // Get unique dates from showtimes
-  const availableDates = Array.from(new Set(
-    showtimes?.map(st => format(new Date(st.startTime), 'yyyy-MM-dd')) ?? []
-  )).sort()
+  const availableDates = Array.from(
+    new Set(
+      showtimes?.map((st) => format(new Date(st.startTime), 'yyyy-MM-dd')) ??
+        [],
+    ),
+  ).sort()
 
   // Get showtimes for selected date
-  const dateShowtimes = showtimes?.filter(st => 
-    selectedDate && format(new Date(st.startTime), 'yyyy-MM-dd') === selectedDate
-  ) ?? []
+  const dateShowtimes =
+    showtimes?.filter(
+      (st) =>
+        selectedDate &&
+        format(new Date(st.startTime), 'yyyy-MM-dd') === selectedDate,
+    ) ?? []
 
   const handleShowtimeSelect = (showtimeId: number) => {
     dispatch({ type: 'shows/addShowtimeId', payload: showtimeId })
@@ -106,8 +122,8 @@ export default function ShowPage({ params }: ShowPageProps) {
                 sizes="192px"
                 className="object-cover rounded-lg"
                 onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/film.png';
+                  const target = e.target as HTMLImageElement
+                  target.src = '/film.png'
                 }}
               />
             </div>
@@ -145,7 +161,7 @@ export default function ShowPage({ params }: ShowPageProps) {
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-xl font-semibold mb-6">Select Date & Time</h2>
-          
+
           {/* Date Selection */}
           <div className="mb-8">
             <h3 className="text-lg font-medium mb-4">Select Date</h3>
@@ -160,9 +176,15 @@ export default function ShowPage({ params }: ShowPageProps) {
                       : 'bg-gray-100 hover:bg-gray-200'
                   }`}
                 >
-                  <span className="text-sm">{format(new Date(date), 'EEE')}</span>
-                  <span className="text-lg font-medium">{format(new Date(date), 'd')}</span>
-                  <span className="text-sm">{format(new Date(date), 'MMM')}</span>
+                  <span className="text-sm">
+                    {format(new Date(date), 'EEE')}
+                  </span>
+                  <span className="text-lg font-medium">
+                    {format(new Date(date), 'd')}
+                  </span>
+                  <span className="text-sm">
+                    {format(new Date(date), 'MMM')}
+                  </span>
                 </button>
               ))}
             </div>

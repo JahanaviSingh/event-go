@@ -22,11 +22,12 @@ const Square = ({ row, column, className }: SquareProps) => {
     <div
       className={cn(
         'w-6 h-6 border border-gray-300 rounded-sm bg-white hover:bg-gray-100 transition-colors relative group',
-        className
+        className,
       )}
     >
       <span className="absolute inset-0 flex items-center justify-center text-[8px] text-gray-500 group-hover:text-gray-700 transition-colors">
-        {rowLetter}{seatNumber}
+        {rowLetter}
+        {seatNumber}
       </span>
     </div>
   )
@@ -85,11 +86,11 @@ export const Grid = ({ rows, columns, className }: GridProps) => {
         for (let j = 0; j < seatsPerSection; j++) {
           // Calculate curve offset based on row position
           const curveOffset = Math.floor((i / rows) * 3) // Gradual curve from 0 to 3
-          
+
           columnElements.push(
-            <Square 
-              key={`${i}-${currentColumn}`} 
-              row={i} 
+            <Square
+              key={`${i}-${currentColumn}`}
+              row={i}
               column={currentColumn}
               className={cn(
                 'transform',
@@ -97,9 +98,9 @@ export const Grid = ({ rows, columns, className }: GridProps) => {
                 curveOffset > 0 && `translate-x-${curveOffset}`,
                 // Add spacing for premium seats
                 i === 0 ? 'bg-blue-50 border-blue-200' : '',
-                i === 1 ? 'bg-blue-50/50 border-blue-200' : ''
+                i === 1 ? 'bg-blue-50/50 border-blue-200' : '',
               )}
-            />
+            />,
           )
           currentColumn++
         }
@@ -107,7 +108,7 @@ export const Grid = ({ rows, columns, className }: GridProps) => {
         // Add aisle if not the last section
         if (section < sections - 1) {
           columnElements.push(
-            <div key={`aisle-${i}-${section}`} className="w-4" />
+            <div key={`aisle-${i}-${section}`} className="w-4" />,
           )
         }
       }
@@ -115,7 +116,7 @@ export const Grid = ({ rows, columns, className }: GridProps) => {
       rowElements.push(
         <div key={`row-${i}`} className="flex items-center">
           {columnElements}
-        </div>
+        </div>,
       )
     }
 
@@ -127,11 +128,7 @@ export const Grid = ({ rows, columns, className }: GridProps) => {
     for (let i = 0; i < columns; i++) {
       labels.push(<ColumnLabel key={i} number={i + 1} />)
     }
-    return (
-      <div className="flex pl-8 gap-1">
-        {labels}
-      </div>
-    )
+    return <div className="flex pl-8 gap-1">{labels}</div>
   }
 
   return (
@@ -155,4 +152,4 @@ export const AuditoriumLayout = ({ rows, columns, className }: GridProps) => {
       <Grid rows={rows} columns={columns} />
     </div>
   )
-} 
+}

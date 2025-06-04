@@ -1,13 +1,13 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { trpcClient } from "@/trpc/clients/client"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Calendar, MapPin, Ticket, User } from "lucide-react"
-import { format } from "date-fns"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { trpcClient } from '@/trpc/clients/client'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Calendar, MapPin, Ticket, User } from 'lucide-react'
+import { format } from 'date-fns'
 import { PreferencesForm } from '@/components/user/PreferencesForm'
 import { BookingsList } from '@/components/user/BookingsList'
 
@@ -23,4 +23,4 @@ export default function UserProfilePage() {
       </div>
     </div>
   )
-} 
+}

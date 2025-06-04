@@ -15,17 +15,18 @@ export interface IListShowsProps {
 }
 
 export const ListAuditoriums = ({ auditoriums }: IListShowsProps) => {
-  const { data: showtimes, isLoading } = trpcClient.showtimes.showtimes.useQuery({
-    where: {},
-    include: {
-      Show: true,
-      Screen: {
-        include: {
-          Auditorium: true
-        }
-      }
-    }
-  })
+  const { data: showtimes, isLoading } =
+    trpcClient.showtimes.showtimes.useQuery({
+      where: {},
+      include: {
+        Show: true,
+        Screen: {
+          include: {
+            Auditorium: true,
+          },
+        },
+      },
+    })
 
   if (isLoading) {
     return (
@@ -45,8 +46,7 @@ export const ListAuditoriums = ({ auditoriums }: IListShowsProps) => {
           <AuditoriumInfo
             auditorium={auditorium}
             showtimes={showtimes?.filter(
-              (showtime) =>
-                showtime.Screen.Auditorium.id === auditorium.id
+              (showtime) => showtime.Screen.Auditorium.id === auditorium.id,
             )}
           />
         </div>

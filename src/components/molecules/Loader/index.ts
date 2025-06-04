@@ -1,1 +1,1 @@
-export { Loader, LoaderPanel } from './Loader' 
+export { Loader, LoaderPanel } from './Loader'

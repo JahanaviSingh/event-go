@@ -11,4 +11,4 @@ export const useKeypress = (keys: string[], callback: () => void) => {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [keys, callback])
-} 
+}

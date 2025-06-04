@@ -71,4 +71,4 @@ export const notification$ = new NotificationEmitter()
 // Connect the emitter to the store
 notification$.subscribe((type, message) => {
   useNotificationStore.getState().addNotification(type, message)
-}) 
+})

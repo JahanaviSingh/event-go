@@ -1,7 +1,14 @@
 'use client'
 
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { trpcClient } from "@/trpc/clients/client"
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { trpcClient } from '@/trpc/clients/client'
 
 export function BookingStats({ auditoriumId }: { auditoriumId?: number }) {
   const { data: stats } = trpcClient.bookings.getBookingStats.useQuery({
@@ -39,4 +46,4 @@ export function BookingStats({ auditoriumId }: { auditoriumId?: number }) {
       </ResponsiveContainer>
     </div>
   )
-} 
+}

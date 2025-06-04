@@ -8,21 +8,22 @@ import { Loader } from '@/components/molecules/Loader'
 
 export default function Page() {
   const router = useRouter()
-  const { data: auditoriums, isLoading } = trpcClient.auditoriums.auditoriums.useQuery({
-    where: {},
-    include: {
-      Screens: {
-        include: {
-          Showtimes: {
-            include: {
-              Show: true
-            }
-          }
-        }
+  const { data: auditoriums, isLoading } =
+    trpcClient.auditoriums.auditoriums.useQuery({
+      where: {},
+      include: {
+        Screens: {
+          include: {
+            Showtimes: {
+              include: {
+                Show: true,
+              },
+            },
+          },
+        },
+        Address: true,
       },
-      Address: true
-    }
-  })
+    })
 
   if (isLoading) {
     return (
@@ -49,7 +50,9 @@ export default function Page() {
 
       {auditoriums?.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-          <h3 className="text-lg font-medium text-gray-900">No auditoriums yet</h3>
+          <h3 className="text-lg font-medium text-gray-900">
+            No auditoriums yet
+          </h3>
           <p className="mt-2 text-gray-600">
             Get started by creating your first auditorium
           </p>

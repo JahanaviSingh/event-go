@@ -10,7 +10,13 @@ import { User } from '@prisma/client'
 import { useState, useEffect } from 'react'
 import { Input } from '@/components/atoms/input'
 import { Label } from '@/components/atoms/label'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/atoms/Dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/atoms/Dialog'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -47,11 +53,17 @@ const columns: ColumnDef<AdminWithUser>[] = [
 
 export default function ManageAdmins() {
   const { data: admins, isLoading } = trpcClient.admins.listAdmins.useQuery()
-  const { mutateAsync: createAdmin } = trpcClient.admins.createAdmin.useMutation()
+  const { mutateAsync: createAdmin } =
+    trpcClient.admins.createAdmin.useMutation()
   const { toast } = useToast()
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateAdminForm>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateAdminForm>({
     resolver: zodResolver(createAdminSchema),
   })
 
@@ -93,9 +105,15 @@ export default function ManageAdmins() {
                 <Input placeholder="Enter email" {...register('email')} />
               </Label>
               <Label title="Password" error={errors.password?.message}>
-                <Input type="password" placeholder="Enter password" {...register('password')} />
+                <Input
+                  type="password"
+                  placeholder="Enter password"
+                  {...register('password')}
+                />
               </Label>
-              <Button type="submit" className="w-full">Create Admin</Button>
+              <Button type="submit" className="w-full">
+                Create Admin
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -103,4 +121,4 @@ export default function ManageAdmins() {
       <DataTable columns={columns} data={admins || []} isLoading={isLoading} />
     </div>
   )
-} 
+}

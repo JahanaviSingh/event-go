@@ -46,7 +46,11 @@ const ZoomOut = () => {
 }
 
 interface CenterOfMapProps {
-  onClick?: (latLng: { lat: number; lng: number; formattedAddress?: string }) => void
+  onClick?: (latLng: {
+    lat: number
+    lng: number
+    formattedAddress?: string
+  }) => void
 }
 
 export const CenterOfMap = ({ onClick }: CenterOfMapProps) => {
@@ -61,7 +65,7 @@ export const CenterOfMap = ({ onClick }: CenterOfMapProps) => {
         onClick?.({
           lat: center.lat,
           lng: center.lng,
-          formattedAddress: `${center.lat}, ${center.lng}`
+          formattedAddress: `${center.lat}, ${center.lng}`,
         })
       }}
       className="p-2 rounded-lg bg-white shadow-lg hover:bg-gray-50"

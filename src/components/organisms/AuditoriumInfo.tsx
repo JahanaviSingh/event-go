@@ -2,7 +2,13 @@ import { RouterOutputs } from '@/trpc/clients/types'
 import { AlertBox } from '../molecules/AlertBox'
 import { ShowScreenShowtimes } from '../templates/ListAuditoriums'
 import { Button } from '../atoms/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../atoms/Dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../atoms/Dialog'
 import { Pencil, Trash2, MapPin, Phone, Globe, Clock } from 'lucide-react'
 import { useState } from 'react'
 import { trpcClient } from '@/trpc/clients/client'
@@ -20,7 +26,7 @@ export const AuditoriumInfo = ({
   const router = useRouter()
   const utils = trpcClient.useUtils()
 
-  const { mutateAsync: deleteAuditorium, isLoading: isDeleting } = 
+  const { mutateAsync: deleteAuditorium, isLoading: isDeleting } =
     trpcClient.auditoriums.deleteAuditorium.useMutation({
       onSuccess: () => {
         utils.auditoriums.auditoriums.invalidate()
@@ -36,7 +42,7 @@ export const AuditoriumInfo = ({
           description: error.message,
           variant: 'destructive',
         })
-      }
+      },
     })
 
   const handleDelete = async () => {
@@ -52,7 +58,9 @@ export const AuditoriumInfo = ({
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-800">{auditorium.name}</h2>
+          <h2 className="text-2xl font-semibold text-gray-800">
+            {auditorium.name}
+          </h2>
           <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
             {auditorium.Address && (
               <div className="flex items-center gap-1">
@@ -69,7 +77,12 @@ export const AuditoriumInfo = ({
             {auditorium.website && (
               <div className="flex items-center gap-1">
                 <Globe className="w-4 h-4" />
-                <a href={auditorium.website} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                <a
+                  href={auditorium.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
                   {auditorium.website}
                 </a>
               </div>
@@ -86,12 +99,17 @@ export const AuditoriumInfo = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.push(`/admin/auditoriums/${auditorium.id}/edit`)}
+            onClick={() =>
+              router.push(`/admin/auditoriums/${auditorium.id}/edit`)
+            }
           >
             <Pencil className="w-4 h-4 mr-2" />
             Edit
           </Button>
-          <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <Dialog
+            open={isDeleteDialogOpen}
+            onOpenChange={setIsDeleteDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button variant="destructive" size="sm">
                 <Trash2 className="w-4 h-4 mr-2" />
@@ -104,7 +122,8 @@ export const AuditoriumInfo = ({
               </DialogHeader>
               <div className="py-4">
                 <p className="text-gray-600">
-                  Are you sure you want to delete {auditorium.name}? This action cannot be undone.
+                  Are you sure you want to delete {auditorium.name}? This action
+                  cannot be undone.
                 </p>
               </div>
               <div className="flex justify-end gap-2">
@@ -157,7 +176,9 @@ export const AuditoriumInfo = ({
 
               {screen.Showtimes.length === 0 ? (
                 <AlertBox className="bg-gray-200">
-                  <div className="text-gray-600 text-sm">No shows scheduled.</div>
+                  <div className="text-gray-600 text-sm">
+                    No shows scheduled.
+                  </div>
                 </AlertBox>
               ) : (
                 <ShowScreenShowtimes screenId={screen.id} />

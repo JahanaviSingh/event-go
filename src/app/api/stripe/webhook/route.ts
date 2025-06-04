@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       console.error('Webhook signature verification failed:', err)
       return NextResponse.json(
         { error: 'Webhook signature verification failed' },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
             userId,
             showtimeId: parsedBookingInfo.showtimeId,
             seats: parsedBookingInfo.seats,
-            bookingId: `BK${Date.now()}`
+            bookingId: `BK${Date.now()}`,
           }),
           status: 'ACTIVE',
         },
@@ -72,8 +72,8 @@ export async function POST(request: Request) {
             data: {
               booked: true,
             },
-          })
-        )
+          }),
+        ),
       )
     }
 
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     console.error('Webhook error:', error)
     return NextResponse.json(
       { error: 'Webhook handler failed' },
-      { status: 500 }
+      { status: 500 },
     )
   }
-} 
+}

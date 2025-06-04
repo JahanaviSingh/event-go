@@ -1,13 +1,13 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { trpcClient } from "@/trpc/clients/client"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Calendar, MapPin, Ticket, User } from "lucide-react"
-import { format } from "date-fns"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { trpcClient } from '@/trpc/clients/client'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Calendar, MapPin, Ticket, User } from 'lucide-react'
+import { format } from 'date-fns'
 
 export default function UserProfilePage() {
   const { data: user } = trpcClient.user.getProfile.useQuery()
@@ -39,21 +39,29 @@ export default function UserProfilePage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Bookings
+                </CardTitle>
                 <Ticket className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{bookings?.length || 0}</div>
+                <div className="text-2xl font-bold">
+                  {bookings?.length || 0}
+                </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Upcoming Shows</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Upcoming Shows
+                </CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {bookings?.filter(b => new Date(b.Showtime.startTime) > new Date()).length || 0}
+                  {bookings?.filter(
+                    (b) => new Date(b.Showtime.startTime) > new Date(),
+                  ).length || 0}
                 </div>
               </CardContent>
             </Card>
@@ -66,13 +74,23 @@ export default function UserProfilePage() {
             <CardContent>
               <div className="space-y-4">
                 {bookings?.map((booking) => (
-                  <div key={booking.id} className="flex items-start gap-4 p-4 border rounded-lg">
+                  <div
+                    key={booking.id}
+                    className="flex items-start gap-4 p-4 border rounded-lg"
+                  >
                     <div className="flex-1">
-                      <h3 className="font-semibold">{booking.Showtime.Show.title}</h3>
+                      <h3 className="font-semibold">
+                        {booking.Showtime.Show.title}
+                      </h3>
                       <div className="text-sm text-muted-foreground space-y-1 mt-1">
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4" />
-                          <span>{format(new Date(booking.Showtime.startTime), 'PPP')}</span>
+                          <span>
+                            {format(
+                              new Date(booking.Showtime.startTime),
+                              'PPP',
+                            )}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4" />
@@ -104,25 +122,37 @@ export default function UserProfilePage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium">Favorite Genre</h3>
-                    <p className="text-sm text-muted-foreground">{user?.preferences?.favoriteGenre || 'Not set'}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {user?.preferences?.favoriteGenre || 'Not set'}
+                    </p>
                   </div>
-                  <Button variant="outline" size="sm">Edit</Button>
+                  <Button variant="outline" size="sm">
+                    Edit
+                  </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium">Preferred Location</h3>
-                    <p className="text-sm text-muted-foreground">{user?.preferences?.preferredLocation || 'Not set'}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {user?.preferences?.preferredLocation || 'Not set'}
+                    </p>
                   </div>
-                  <Button variant="outline" size="sm">Edit</Button>
+                  <Button variant="outline" size="sm">
+                    Edit
+                  </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium">Notification Settings</h3>
                     <p className="text-sm text-muted-foreground">
-                      {user?.preferences?.notificationSettings ? 'Enabled' : 'Disabled'}
+                      {user?.preferences?.notificationSettings
+                        ? 'Enabled'
+                        : 'Disabled'}
                     </p>
                   </div>
-                  <Button variant="outline" size="sm">Edit</Button>
+                  <Button variant="outline" size="sm">
+                    Edit
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -139,16 +169,24 @@ export default function UserProfilePage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium">Profile Information</h3>
-                    <p className="text-sm text-muted-foreground">Update your profile details</p>
+                    <p className="text-sm text-muted-foreground">
+                      Update your profile details
+                    </p>
                   </div>
-                  <Button variant="outline" size="sm">Edit</Button>
+                  <Button variant="outline" size="sm">
+                    Edit
+                  </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium">Change Password</h3>
-                    <p className="text-sm text-muted-foreground">Update your password</p>
+                    <p className="text-sm text-muted-foreground">
+                      Update your password
+                    </p>
                   </div>
-                  <Button variant="outline" size="sm">Change</Button>
+                  <Button variant="outline" size="sm">
+                    Change
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -157,4 +195,4 @@ export default function UserProfilePage() {
       </Tabs>
     </div>
   )
-} 
+}

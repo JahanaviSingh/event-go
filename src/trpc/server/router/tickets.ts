@@ -4,9 +4,11 @@ import { TRPCError } from '@trpc/server'
 
 export const ticketsRouter = createTRPCRouter({
   getTicket: protectedProcedure
-    .input(z.object({
-      sessionId: z.string(),
-    }))
+    .input(
+      z.object({
+        sessionId: z.string(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const ticket = await ctx.db.ticket.findFirst({
         where: {
@@ -49,10 +51,12 @@ export const ticketsRouter = createTRPCRouter({
         qrCode: ticket.qrCode,
         show: ticket.Booking.Showtime.Show,
         showtime: ticket.Booking.Showtime,
-        seats: [{
-          row: ticket.Booking.row,
-          column: ticket.Booking.column,
-        }],
+        seats: [
+          {
+            row: ticket.Booking.row,
+            column: ticket.Booking.column,
+          },
+        ],
       }
     }),
-}) 
+})

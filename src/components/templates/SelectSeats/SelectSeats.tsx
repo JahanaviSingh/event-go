@@ -2,11 +2,7 @@ import { loadStripe } from '@stripe/stripe-js'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { Square, StaightMovieScreen } from '@/components/organisms/ScreenUtils'
 import { LoaderPanel } from '@/components/molecules/Loader'
-import {
-  addSeat,
-  resetSeats,
-  resetShows,
-} from '@/store/shows/store'
+import { addSeat, resetSeats, resetShows } from '@/store/shows/store'
 import { SeatNumber } from '@/components/molecules/SeatNumber'
 import { Success } from '../SearchAuditorium'
 import { Button } from '@/components/atoms/button'
@@ -29,10 +25,18 @@ interface SelectedSeat {
 
 export const SelectSeats = () => {
   const dispatch = useAppDispatch()
-  const selectedSeats = useAppSelector((state: RootState) => state.shows.selectedSeats)
-  const showtimeId = useAppSelector((state: RootState) => state.shows.selectedShowtimeId)
-  const isAuthenticated = useAppSelector((state: RootState) => state.user.isAuthenticated)
-  const selectedScreenId = useAppSelector((state: RootState) => state.shows.selectedScreenId)
+  const selectedSeats = useAppSelector(
+    (state: RootState) => state.shows.selectedSeats,
+  )
+  const showtimeId = useAppSelector(
+    (state: RootState) => state.shows.selectedShowtimeId,
+  )
+  const isAuthenticated = useAppSelector(
+    (state: RootState) => state.user.isAuthenticated,
+  )
+  const selectedScreenId = useAppSelector(
+    (state: RootState) => state.shows.selectedScreenId,
+  )
 
   if (!showtimeId) return null
 
@@ -41,43 +45,49 @@ export const SelectSeats = () => {
   }
 
   // Group seats by row for display
-  const rows = selectedSeats.reduce((acc: Record<string, Seat[]>, seat: SelectedSeat) => {
-    const rowKey = seat.row.toString()
-    if (!acc[rowKey]) {
-      acc[rowKey] = []
-    }
-    acc[rowKey].push({
-      row: seat.row,
-      column: seat.column,
-      price: 0, // This should come from your showtime data
-    })
-    return acc
-  }, {})
+  const rows = selectedSeats.reduce(
+    (acc: Record<string, Seat[]>, seat: SelectedSeat) => {
+      const rowKey = seat.row.toString()
+      if (!acc[rowKey]) {
+        acc[rowKey] = []
+      }
+      acc[rowKey].push({
+        row: seat.row,
+        column: seat.column,
+        price: 0, // This should come from your showtime data
+      })
+      return acc
+    },
+    {},
+  )
 
   return (
     <div className="flex flex-col items-center">
       <div className="flex justify-center overflow-x-auto">
         <div>
-          {(Object.entries(rows) as [string, Seat[]][]).map(([rowNumber, seatsInRow]) => (
-            <div key={rowNumber} className="flex gap-1 mt-1">
-              {seatsInRow.map((seat: Seat) => (
-                <button
-                  key={`${seat.row}-${seat.column}`}
-                  className={`w-8 h-8 rounded ${
-                    selectedSeats.some(
-                      (s: SelectedSeat) => s.row === seat.row && s.column === seat.column,
-                    )
-                      ? 'bg-primary'
-                      : 'bg-gray-200'
-                  }`}
-                  disabled={Boolean(seat?.booked)}
-                  onClick={() => handleSeatClick(seat.row, seat.column)}
-                >
-                  <SeatNumber number={seat.column} />
-                </button>
-              ))}
-            </div>
-          ))}
+          {(Object.entries(rows) as [string, Seat[]][]).map(
+            ([rowNumber, seatsInRow]) => (
+              <div key={rowNumber} className="flex gap-1 mt-1">
+                {seatsInRow.map((seat: Seat) => (
+                  <button
+                    key={`${seat.row}-${seat.column}`}
+                    className={`w-8 h-8 rounded ${
+                      selectedSeats.some(
+                        (s: SelectedSeat) =>
+                          s.row === seat.row && s.column === seat.column,
+                      )
+                        ? 'bg-primary'
+                        : 'bg-gray-200'
+                    }`}
+                    disabled={Boolean(seat?.booked)}
+                    onClick={() => handleSeatClick(seat.row, seat.column)}
+                  >
+                    <SeatNumber number={seat.column} />
+                  </button>
+                ))}
+              </div>
+            ),
+          )}
         </div>
       </div>
 
@@ -92,14 +102,14 @@ export const SelectSeats = () => {
               if (!selectedScreenId) {
                 notification$.next({
                   message: 'Something went wrong.',
-                  type: 'error'
+                  type: 'error',
                 })
                 return
               }
               if (!isAuthenticated) {
-                notification$.next({ 
+                notification$.next({
                   message: 'You are not logged in.',
-                  type: 'error'
+                  type: 'error',
                 })
                 return
               }
